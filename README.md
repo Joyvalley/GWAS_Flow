@@ -1,8 +1,8 @@
-# GWAS-Flow
+# GWAS_Flow
 
 ## Introduction 
 
-GWAS-flow is an open source python based software provding a gpu-accelerated framework for performing genome association studies, published under the MIT-License. 
+GWAS_Flow is an open source python based software provding a gpu-accelerated framework for performing genome association studies, published under the MIT-License. 
 GWAS is a set  of  major algorithms in quantitative genetics  to find associations between  phenotypes and their resepective genotypes. With a broad range of appilications ranging from plant breeding to medicine. 
 In recent years the datasets used for those studies increased rapidly in size, and concordingly the time necassary too perform these on conventinal cpu-powered machines increased exponentially. Here we used tensorflow a framework that is commonly used for machine learning applications to utilize graphical processing units (GPU) for GWAS. 
 
@@ -10,20 +10,19 @@ In recent years the datasets used for those studies increased rapidly in size, a
 
 
 ## Required Software
-	-[python](https://www.python.org/) (v.3.7.3)
-	-[anaconda](https://www.anaconda.com/) (v.4.7.5)
+- [python](https://www.python.org/ "Python programming language") (v.3.7.3)
 
 ## Required python packages
-	- [tensorflow](https://www.tensorflow.org/ "tensorflow") (v.1.14.0)
-	- [numpy](https://numpy.org/ "numerical python") (v.1.16.4)
-	- [pandas](https://pandas.pydata.org/ "import and manipulate data frames")(v.24.2)
-	- [scipy](https://www.scipy.org/ "scientific python") (v.1.3.0)
-	- [h5py](https://www.h5py.org/ "import and manipulated hdf files") (v.2.9.0)
+- [tensorflow](https://www.tensorflow.org/ "tensorflow") (v.1.14.0)
+- [numpy](https://numpy.org/ "numerical python") (v.1.16.4)
+- [pandas](https://pandas.pydata.org/ "import and manipulate data frames")(v.24.2)
+- [scipy](https://www.scipy.org/ "scientific python") (v.1.3.0)
+- [h5py](https://www.h5py.org/ "import and manipulated hdf files") (v.2.9.0)
 
 
 ## Docker and Singularity
-	- [Docker](https://www.docker.com/) (v.19.03.1)
-	- [Singularity](https://singularity.lbl.gov/) (v.2.5.2)
+- [Docker](https://www.docker.com/) (v.19.03.1)
+- [Singularity](https://singularity.lbl.gov/) (v.2.5.2)
 
 ## Installation 
 
@@ -32,7 +31,7 @@ In recent years the datasets used for those studies increased rapidly in size, a
 clone the directory directly from git 
 
 ```shell
-git clone https://github.com/Joyvalley/gwas_tf 
+git clone https://github.com/Joyvalley/GWAS_Flow
 ``` 
 
 create and anaconda environment and install the necassary packages
@@ -72,7 +71,7 @@ python gwas.py -x gwas_sample_data/AT_geno.hdf5 -y gwas_sample_data/phenotype.cs
 
 ```
 
-Flgas and optiosn options are 	
+Flgas and options are 	
 ```shell
 -x , --genotype : file containing marker information in csv or hdf5 format of size
 -y , --phenotype : file container phenotype information in csv format
