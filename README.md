@@ -10,8 +10,8 @@ In recent years the datasets used for those studies increased rapidly in size, a
 
 
 ## Required Software
-	-[python](https://www.python.org/) (v.3.7.3)
-	-[anaconda](https://www.anaconda.com/) (v.4.7.5)
+	[python](https://www.python.org/) (v.3.7.3)
+	[anaconda](https://www.anaconda.com/) (v.4.7.5)
 
 ## Required python packages
 	- [tensorflow](https://www.tensorflow.org/ "tensorflow") (v.1.14.0)
