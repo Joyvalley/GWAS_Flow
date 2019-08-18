@@ -1,0 +1,62 @@
+FROM ubuntu:18.04
+
+LABEL maintainer="jan.freudenthal@uni-wuerzburg.de"
+
+RUN apt update 
+
+RUN apt install --yes && \
+    apt install --yes \
+    	locales
+	
+RUN locale-gen en_GB.UTF-8
+
+
+RUN apt install -y emacs git 
+RUN apt install -y wget bzip2 sudo 
+    		 
+RUN adduser --disabled-password --gecos '' ubuntu
+RUN adduser ubuntu sudo
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+USER ubuntu
+WORKDIR /home/ubuntu/
+RUN chmod a+rwx /home/ubuntu/
+
+
+#### change anaconda to miniconda 
+
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+RUN bash Miniconda3-latest-Linux-x86_64.sh -b 
+RUN rm Miniconda3-latest-Linux-x86_64.sh 
+ENV PATH /home/ubuntu/miniconda3/bin:$PATH
+
+
+# Updating Anaconda packages
+RUN conda update conda
+RUN conda create -n py36 python=3.6
+RUN conda activate py36
+RUN conda install tensorflow-gpu=1.12 
+RUN conda install -c anaconda cudatoolkit=9.0 
+RUN conda install scipy 
+RUN conda install numpy
+RUN conda install pandas
+RUN pip install limix
+RUN conda install h5py
+
+
+ADD gwas.py .
+ADD herit.py .
+ADD main.py .
+
+
+WORKDIR /data
+RUN which python
+ENTRYPOINT ["python","-u","/home/ubuntu/gwas.py"]
+
+# docker build  -t tf_image  docker
+
+### Run docker container
+## docker run --rm -u $UID:$GID -v $PWD:/data tf_image:latest  -x gwas_sample_data/KE_geno.csv -y gwas_sample_data/KE_pheno.csv -k gwas_sample_data/K.csv -m 2 -perm No
+
+### Build singulartiy container from docker container locally 
+
+## docker run -v /var/run/docker.sock:/var/run/docker.sock -v /home/joyvalley/PHD/Projects/gwastf:/output --privileged -t singularityware/docker2singularity:1.11 tf_image:latest
