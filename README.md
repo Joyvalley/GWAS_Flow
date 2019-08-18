@@ -89,5 +89,4 @@ use `python gwas.py -h` to see the command line options
 
 
 ## Performance Benchmarking
-
-![text](https://github.com/Joyvalley/GWAS_Flow/blob/master/benchmark.pdf)
+![benchmark](https://user-images.githubusercontent.com/26280192/63228473-bf2b2400-c1f3-11e9-86c2-081ca86127bd.png)
