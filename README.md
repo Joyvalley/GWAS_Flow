@@ -32,7 +32,7 @@ In recent years the datasets used for those studies increased rapidly in size, a
 clone the directory directly from git 
 
 ```shell
-git clone https://github.com/Joyvalley/gwas_tf 
+git clone https://github.com/Joyvalley/GWAS_Flow
 ``` 
 
 create and anaconda environment and install the necassary packages
