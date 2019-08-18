@@ -88,5 +88,6 @@ Flgas and options are
 use `python gwas.py -h` to see the command line options
 
 
+## Performance Benchmarking
 
-
+![alt text](http://Joyvalley/GWAS_Flow/benchmark.pdf)
