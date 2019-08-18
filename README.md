@@ -2,9 +2,9 @@
 
 ## Introduction 
 
-GWAS_Flow is an open source python based software provding a gpu-accelerated framework for performing genome association studies, published under the MIT-License. 
-GWAS is a set  of  major algorithms in quantitative genetics  to find associations between  phenotypes and their resepective genotypes. With a broad range of appilications ranging from plant breeding to medicine. 
-In recent years the datasets used for those studies increased rapidly in size, and concordingly the time necassary too perform these on conventinal cpu-powered machines increased exponentially. Here we used tensorflow a framework that is commonly used for machine learning applications to utilize graphical processing units (GPU) for GWAS. 
+GWAS_Flow is an open source python based software provding a GPU-accelerated framework for performing genome association studies, published under the MIT-License. 
+GWAS is a set  of  major algorithms in quantitative genetics  to find associations between  phenotypes and their respective genotypes. With a broad range of applications ranging from plant breeding to medicine. 
+In recent years the data sets used for those studies increased rapidly in size, and accordingly the time necessary too perform these on conventional CPU-powered machines increased exponentially. Here we used TensorFlow a framework that is commonly used for machine learning applications to utilize graphical processing units (GPU) for GWAS. 
 
 ## Requirements
 
@@ -47,7 +47,7 @@ pip install limix
 ### docker 
 
 ```shell 
-git clone https://github.com/Joyvalley/gwas_tf.git 
+git clone https://github.com/Joyvalley/GWAS_Flow.git 
 
 docker build  -t gwas_flow  docker
 
@@ -76,9 +76,9 @@ Flgas and options are
 -x , --genotype : file containing marker information in csv or hdf5 format of size
 -y , --phenotype : file container phenotype information in csv format
 -k , --kinship : file containing kinship matrix of size k X k in csv or hdf5 format
--m : integer specifying the column of phentype file to use. Default -m 0
--a , --mac_min : integer specifiying the minimum minor allele count necassary for a marker to be included. Default a = 1
--bs, --batch-size : integer specifiying the number of markers processed at once. Default -bs 500000
+-m : integer specifying the column of phenotype file to use. Default -m 0
+-a , --mac_min : integer specifying the minimum minor allele count necessary for a marker to be included. Default a = 1
+-bs, --batch-size : integer specifying the number of markers processed at once. Default -bs 500000
 -p , --perm : 
 -o , --out : name of output file. Default -o results.csv  
 -h , --help : prints help and command line options
@@ -88,5 +88,8 @@ Flgas and options are
 use `python gwas.py -h` to see the command line options
 
 
-## Performance Benchmarking
+## Performance Benchmarking and Recommendations
 ![benchmark](https://user-images.githubusercontent.com/26280192/63228473-bf2b2400-c1f3-11e9-86c2-081ca86127bd.png)
+
+The image displays the average time of 10 runs with 10000 markers each and varying number of phenotypes for GWAS_Flow on GPU and CPUs and a standard [R-Script](https://github.com/arthurkorte/GWAS "GWAS") for GWAS.  The computational time growths exponentially with increasing number of phenotypes. With lower numbers of phenotypes (< 800), the CPU version is faster than the GPU Version. This gets more and more lopsided the more phenotypes are included. 
+All calculations have been performed on 16 i9 vCPUS and a NVIDIA Tesla P100 graphic card.
