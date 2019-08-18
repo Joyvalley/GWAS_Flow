@@ -10,7 +10,6 @@ In recent years the datasets used for those studies increased rapidly in size, a
 
 
 ## Required Software
-- [GNU R](https://www.r-project.org/ "The R Project for Statistical Computing") (3.2.3)
 - [python](https://www.python.org/ "Python programming language") (v.3.7.3)
 
 ## Required python packages
