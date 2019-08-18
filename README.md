@@ -10,21 +10,20 @@ In recent years the datasets used for those studies increased rapidly in size, a
 
 
 ## Required Software
- - [GNU R](https://www.r-project.org/ "The R Project for Statistical Computing") (3.2.3)
-	[python](https://www.python.org/) (v.3.7.3)
-	[anaconda](https://www.anaconda.com/) (v.4.7.5)
+- [GNU R](https://www.r-project.org/ "The R Project for Statistical Computing") (3.2.3)
+- [python](https://www.python.org/ "Python programming language") (v.3.7.3)
 
 ## Required python packages
-	- [tensorflow](https://www.tensorflow.org/ "tensorflow") (v.1.14.0)
-	- [numpy](https://numpy.org/ "numerical python") (v.1.16.4)
-	- [pandas](https://pandas.pydata.org/ "import and manipulate data frames")(v.24.2)
-	- [scipy](https://www.scipy.org/ "scientific python") (v.1.3.0)
-	- [h5py](https://www.h5py.org/ "import and manipulated hdf files") (v.2.9.0)
+- [tensorflow](https://www.tensorflow.org/ "tensorflow") (v.1.14.0)
+- [numpy](https://numpy.org/ "numerical python") (v.1.16.4)
+- [pandas](https://pandas.pydata.org/ "import and manipulate data frames")(v.24.2)
+- [scipy](https://www.scipy.org/ "scientific python") (v.1.3.0)
+- [h5py](https://www.h5py.org/ "import and manipulated hdf files") (v.2.9.0)
 
 
 ## Docker and Singularity
-	- [Docker](https://www.docker.com/) (v.19.03.1)
-	- [Singularity](https://singularity.lbl.gov/) (v.2.5.2)
+- [Docker](https://www.docker.com/) (v.19.03.1)
+- [Singularity](https://singularity.lbl.gov/) (v.2.5.2)
 
 ## Installation 
 
