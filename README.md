@@ -1,8 +1,8 @@
-# GWAS-Flow
+# GWAS_Flow
 
 ## Introduction 
 
-GWAS-flow is an open source python based software provding a gpu-accelerated framework for performing genome association studies, published under the MIT-License. 
+GWAS_Flow is an open source python based software provding a gpu-accelerated framework for performing genome association studies, published under the MIT-License. 
 GWAS is a set  of  major algorithms in quantitative genetics  to find associations between  phenotypes and their resepective genotypes. With a broad range of appilications ranging from plant breeding to medicine. 
 In recent years the datasets used for those studies increased rapidly in size, and concordingly the time necassary too perform these on conventinal cpu-powered machines increased exponentially. Here we used tensorflow a framework that is commonly used for machine learning applications to utilize graphical processing units (GPU) for GWAS. 
 
@@ -10,6 +10,7 @@ In recent years the datasets used for those studies increased rapidly in size, a
 
 
 ## Required Software
+ - [GNU R](https://www.r-project.org/ "The R Project for Statistical Computing") (3.2.3)
 	[python](https://www.python.org/) (v.3.7.3)
 	[anaconda](https://www.anaconda.com/) (v.4.7.5)
 
