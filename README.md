@@ -72,7 +72,7 @@ python gwas.py -x gwas_sample_data/AT_geno.hdf5 -y gwas_sample_data/phenotype.cs
 
 ```
 
-Flgas and optiosn options are 	
+Flgas and options are 	
 ```shell
 -x , --genotype : file containing marker information in csv or hdf5 format of size
 -y , --phenotype : file container phenotype information in csv format
