@@ -132,7 +132,6 @@ def gwas(X,K,Y,batch_size):
             output = np.append(output,tmp,axis=0)
         sess.close()
         F_dist = output[:,0]
-    print(F_dist)
     pval  = 1 - f.cdf(F_dist,1,n-3)
     output[:,0] = pval
     return output 
