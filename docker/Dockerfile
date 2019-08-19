@@ -45,14 +45,13 @@ ADD gwas.py .
 ADD herit.py .
 ADD main.py .
 
-
 WORKDIR /data
 ENTRYPOINT ["python","-u","/home/ubuntu/gwas.py"]
 
 # docker build  -t tf_image  docker
 
 ### Run docker container
-## docker run --rm -u $UID:$GID -v $PWD:/data tf_image:latest  -x gwas_sample_data/KE_geno.csv -y gwas_sample_data/KE_pheno.csv -k gwas_sample_data/K.csv -m 2 -perm No
+## docker run --rm -u $UID:$GID -v $PWD:/data gwas_flow:latest  -x gwas_sample_data/AT_geno.hdf5 -y gwas_sample_data/phenotype.csv -k gwas_sample_data/kinship_ibs_binary_mac5.h5py
 
 ### Build singulartiy container from docker container locally 
 
