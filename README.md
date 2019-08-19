@@ -60,7 +60,9 @@ git clone https://github.com/Joyvalley/gwas_tf.git
 
 docker build  -t gwas_flow docker
 
-docker run -v /var/run/docker.sock:/var/run/docker.sock -v /path/to/git/gwastf:/output --privileged -t singularityware/docker2singularity:1.11 ggwas:latest
+!! make sure to change /PATH/TO/FOLDER
+docker run -v /var/run/docker.sock:/var/run/docker.sock -v /PATH/TO/FOLDER:/output --privileged -t singularityware/docker2singularity:1.11 gwas_flow:latest
+change the name of e.g. gwas_flow_latest-2019-08-19-8c98f492dd54.img to gwas_flow_sing.img
 ```
 ## Execution 
 To run the gwas with default settings and the sample data provided in gwas_sample_data/ 
@@ -86,6 +88,18 @@ Flgas and options are
 ```
 
 use `python gwas.py -h` to see the command line options
+
+### Execution with docker and singularity 
+
+Execute the docker container with the sample data
+```shell
+docker run --rm -u $UID:$GID -v $PWD:/data gwas_flow:latest  -x gwas_sample_data/AT_geno.hdf5 -y gwas_sample_data/phenotype.csv -k gwas_sample_data/kinship_ibs_binary_mac5.h5py
+```
+
+Execute the singularity image with the sample data
+```shell
+singularity run  gwas_flow_sing.img -x gwas_sample_data/AT_geno.hdf5 -y gwas_sample_data/phenotype.csv -k gwas_sample_data/kinship_ibs_binary_mac5.h5py
+```
 
 
 ## Performance Benchmarking and Recommendations
