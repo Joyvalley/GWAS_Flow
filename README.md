@@ -95,6 +95,8 @@ Execute the docker container with the sample data
 ```shell
 docker run --rm -u $UID:$GID -v $PWD:/data gwas_flow:latest  -x gwas_sample_data/AT_geno.hdf5 -y gwas_sample_data/phenotype.csv -k gwas_sample_data/kinship_ibs_binary_mac5.h5py
 ```
+!! The GPU versions of docker and singularity are still under development and might or might not work properly with your setup.
+To run the GWAS-Flow on GPUs as of now we recommand the usage of anaconda environments
 
 Execute the singularity image with the sample data
 ```shell
