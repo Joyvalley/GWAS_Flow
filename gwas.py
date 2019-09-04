@@ -105,10 +105,11 @@ elif perm > 1:
 print("done")
  
 end = time.time()
-print(end - start)
+eltime = np.round(end -start,2)
 
-
-
-K_file = '../kinship_ibs_binary_mac5.h5py'
-X_file = '../all_chromosomes_binary.hdf5'
-Y_file = 'datasets/Mean(P2)_C/phenotype.csv'
+if eltime <= 59:
+    print("Total time elapsed",  eltime, "seconds")
+elif eltime > 59 :
+    print("Total time elapsed",  eltime / 60 , "minutes")
+elif eltime > 3600 :
+    print("Total time elapsed",  eltime / 60 / 60, "hours")
