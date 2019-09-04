@@ -109,7 +109,7 @@ eltime = np.round(end -start,2)
 
 if eltime <= 59:
     print("Total time elapsed",  eltime, "seconds")
-elif eltime > 59 :
+elif eltime > 59 and eltime <= 3600:
     print("Total time elapsed",  eltime / 60 , "minutes")
 elif eltime > 3600 :
     print("Total time elapsed",  eltime / 60 / 60, "hours")
