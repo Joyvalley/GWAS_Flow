@@ -56,8 +56,6 @@ for i in range (1,len(sys.argv),2):
 
 print("parsed commandline args")
 
-perm=200
-
 start = time.time()
 
 X,K,Y_,markers = main.load_and_prepare_data(X_file,Y_file,K_file,m)
