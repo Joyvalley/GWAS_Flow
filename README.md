@@ -102,7 +102,7 @@ singularity run  gwas_flow_sing.img -x gwas_sample_data/AT_geno.hdf5 -y gwas_sam
 
 
 ## Performance Benchmarking and Recommendations
-[Figure1_bioRxiv.pdf](https://github.com/Joyvalley/GWAS_Flow/files/3675247/Figure1_bioRxiv.pdf)
+![Figure1_bioRxiv.pdf](https://github.com/Joyvalley/GWAS_Flow/files/3675247/Figure1_bioRxiv.pdf)
 ![benchmark](https://user-images.githubusercontent.com/26280192/63228473-bf2b2400-c1f3-11e9-86c2-081ca86127bd.png)
 
 The image displays the average time of 10 runs with 10000 markers each and varying number of phenotypes for `GWAS_Flow` on GPU and CPUs and a standard [R-Script](https://github.com/arthurkorte/GWAS "GWAS") for GWAS.
