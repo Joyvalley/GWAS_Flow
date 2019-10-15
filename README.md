@@ -76,7 +76,7 @@ Flgas and options are
 -x , --genotype : file containing marker information in csv or hdf5 format of size
 -y , --phenotype : file container phenotype information in csv format
 -k , --kinship : file containing kinship matrix of size k X k in csv or hdf5 format
--m : integer specifying the column of phenotype file to use. Default -m 0
+-m : name of column to be used in phenotype file. Default m='phenotype_value' 
 -a , --mac_min : integer specifying the minimum minor allele count necessary for a marker to be included. Default a = 1
 -bs, --batch-size : integer specifying the number of markers processed at once. Default -bs 500000
 -p , --perm : 
