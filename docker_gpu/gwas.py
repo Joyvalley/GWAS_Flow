@@ -26,7 +26,7 @@ for i in range (1,len(sys.argv),2):
     elif sys.argv[i] == "-k" or sys.argv[i] == "--kinship":
         K_file = sys.argv[i+1]
     elif sys.argv[i] == "-m":
-        m = int(sys.argv[i+1])
+        m = sys.argv[i+1]
     elif sys.argv[i] == "-a" or sys.argv[i] == "--mac_min":
         mac_min = int(sys.argv[i+1])
     elif sys.argv[i] == "-bs" or sys.argv[i] == "--batch-size":
@@ -39,7 +39,7 @@ for i in range (1,len(sys.argv),2):
         print("-x , --genotype :file containing marker information in csv or hdf5 format of size")
         print("-y , --phenotype: file container phenotype information in csv format"  )
         print("-k , --kinship : file containing kinship matrix of size k X k in csv or hdf5 format")
-        print("-m : integer specifying the column of phentype file to use. Default -m 0")
+        print("-m : name of columnn containing the phenotype : default m = phenotype_value")
         print("-a , --mac_min : integer specifying the minimum minor allele count necessary for a marker to be included. Default a = 1" )
         print("-bs, --batch-size : integer specifying the number of markers processed at once. Default -bs 500000" )
         print("-p , --perm : single integer specifying the number of permutations default 1 == no perm ")
