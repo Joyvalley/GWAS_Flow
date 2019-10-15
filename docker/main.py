@@ -14,7 +14,7 @@ def load_and_prepare_data(X_file,Y_file,K_file,m):
     
     ## load and preprocess genotype matrix 
     Y = pd.read_csv(Y_file,engine='python').sort_values(['accession_id']).groupby('accession_id').mean()
-    Y = pd.DataFrame({'accession_id' :  Y.index, 'phenotype_value' : Y.phenotype_value})
+    Y = pd.DataFrame({'accession_id' :  Y.index, 'phenotype_value' : Y[m]})
     if type_X == 'hdf5' or type_X == 'h5py'  :
         SNP = h5py.File(X_file,'r')
         markers= np.asarray(SNP['positions'])
@@ -33,7 +33,7 @@ def load_and_prepare_data(X_file,Y_file,K_file,m):
     elif type_K == 'csv':
         k = pd.read_csv(K_file,index_col=0)
         acc_K = k.index
-        k = np.array(k, dtype=np.float32)[0:471,0:471]
+        k = np.array(k, dtype=np.float32)
 
     acc_Y =  np.asarray(Y[['accession_id']]).flatten()
     acc_isec = [isec for isec in acc_X if isec in acc_Y]
@@ -42,7 +42,7 @@ def load_and_prepare_data(X_file,Y_file,K_file,m):
     idy_acc = list(map(lambda x: x in acc_isec, acc_Y))
     idk_acc = list(map(lambda x: x in acc_isec, acc_K))
 
-    Y_ = np.asarray(Y.drop('accession_id',1),dtype=np.float32)[idy_acc,m]
+    Y_ = np.asarray(Y.drop('accession_id',1),dtype=np.float32)[idy_acc,:]
 
     if type_X == 'hdf5' or type_X == 'h5py' :
         X = np.asarray(SNP['snps'][0:(len(SNP['snps'])+1),],dtype=np.float32)[:,idx_acc].T
@@ -69,9 +69,6 @@ def mac_filter(mac_min, X, markers):
     X = X[:,macs >= mac_min]
     return markers_used, X, macs
 
-
-
-
 def gwas(X,K,Y,batch_size):
     n_marker = X.shape[1]
     n = len(Y)
@@ -79,7 +76,7 @@ def gwas(X,K,Y,batch_size):
     K_stand = (n-1)/np.sum((np.identity(n) - np.ones((n,n))/n) * K) * K
     vg, delta, ve  = herit.estimate(Y,"normal",K_stand,verbose = False)
     print(" Pseudo-heritability is " , vg / (ve + vg + delta))
-    print(" Performing GWAS on ", n , " phenotypes and ", n_marker )
+    print(" Performing GWAS on ", n , " phenotypes and ", n_marker ,"markers")
     ## Transform kinship-matrix, phenotypes and estimate intercpt
     Xo = np.ones(K.shape[0]).flatten()
     M = np.transpose(np.linalg.inv(np.linalg.cholesky(vg * K_stand + ve  * np.identity(n)))).astype(np.float32)
