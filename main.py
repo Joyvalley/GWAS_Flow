@@ -94,7 +94,6 @@ def gwas(X,K,Y,batch_size,cof):
     #transform  co-factor
     if isinstance(cof,int) == False:
         cof_t = np.sum(np.multiply(np.transpose(M),cof),axis=1).astype(np.float32)
-        print(cof_t)
     
     ## EMMAX Scan
     RSS_env = (np.linalg.lstsq(np.reshape(int_t,(n,-1)) , np.reshape(Y_t,(n,-1)))[1]).astype(np.float32)
@@ -107,11 +106,13 @@ def gwas(X,K,Y,batch_size,cof):
         StdERR = tf.sqrt(tf.linalg.diag_part(tf.math.multiply(SE , tf.linalg.inv(tf.matmul(tf.transpose(x),x)))))[1]
         return tf.stack((coeff[1,0],StdERR))
     ## calculate residual sum squares 
+
     def rss(a,M,y,int_t):
         x_t = tf.reduce_sum(tf.math.multiply(M.T,a),axis=1)
         lm_res = tf.linalg.lstsq(tf.transpose(tf.stack((int_t,x_t),axis=0)),Y_t2d)
         lm_x = tf.concat((tf.squeeze(lm_res),x_t),axis=0)
         return tf.reduce_sum(tf.math.square(tf.math.subtract(tf.squeeze(Y_t2d),tf.math.add(tf.math.multiply(lm_x[1],lm_x[2:]), tf.multiply(lm_x[0],int_t)))))
+    ## calculate residual sum squares with co-variates
     def rss_cof(a,M,y,int_t,cof):
         x_t = tf.reduce_sum(tf.math.multiply(M.T,a),axis=1)
         lm_res = tf.linalg.lstsq(tf.transpose(tf.stack((int_t,x_t,cof_t),axis=0)),Y_t2d)
