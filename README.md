@@ -70,6 +70,13 @@ Make sure to have all the required packages installed
 python gwas.py -x gwas_sample_data/AT_geno.hdf5 -y gwas_sample_data/phenotype.csv -k gwas_sample_data/kinship_ibs_binary_mac5.h5py
 
 ```
+To execute with csv input data and cofactors 
+
+```shell
+python gwas.py -x gwas_sample_data/G_sample.csv -y gwas_sample_data/Y_sample.csv -k gwas_sample_data/K_sample.csv --cof gwas_sample_data/cof.csv
+
+```
+
 
 Flgas and options are 	
 ```shell
