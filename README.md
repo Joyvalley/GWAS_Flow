@@ -1,5 +1,11 @@
 # GWAS_Flow
 
+## Citing
+`GWAS-Flow` was written and published in the hope that you might find it useful. If you do and use it for your research please cite the paper published alongside the software, which is currently publicly accessible on the BiorXiv preprint server. https://www.biorxiv.org/content/10.1101/783100v1  doi: 10.1101/783100 
+
+
+
+
 ## Introduction 
 
 `GWAS_Flow` is an open source python based software provding a GPU-accelerated framework for performing genome-wide association studies (GWAS), published under the MIT-License. 
