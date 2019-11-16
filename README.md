@@ -33,6 +33,7 @@ Here we use TensorFlow a framework that is commonly used for machine learning ap
 ## Installation 
 
 ### git and anaconda 
+This has been tested on multiple linux systems with anconda versions > 4.7 
 
 clone the repository directly with git 
 
