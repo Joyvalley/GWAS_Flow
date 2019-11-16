@@ -10,13 +10,15 @@ import h5py
 mac_min = 1
 batch_size =  500000 
 out_file = "results.csv"
-m = 0
+m = 'phenotype_value'
 perm = 1
 mac_min= 6
 
 X_file = 'gwas_sample_data/AT_geno.hdf5'
 Y_file = 'gwas_sample_data/phenotype.csv'
 K_file = 'gwas_sample_data/kinship_ibs_binary_mac5.h5py'
+
+
 
 for i in range (1,len(sys.argv),2):
     if sys.argv[i] == "-x" or sys.argv[i] == "--genotype":
@@ -42,7 +44,7 @@ for i in range (1,len(sys.argv),2):
         print("-m : name of columnn containing the phenotype : default m = phenotype_value")
         print("-a , --mac_min : integer specifying the minimum minor allele count necessary for a marker to be included. Default a = 1" )
         print("-bs, --batch-size : integer specifying the number of markers processed at once. Default -bs 500000" )
-        print("-p , --perm : single integer specifying the number of permutations default 1 == no perm ")
+        print("-p , --perm : single integer specifying the number of permutations. Default 1 == no perm ")
         print("-o , --out : name of output file. Default -o results.csv  ")
         print("-h , --help : prints help and command line options")
         quit()
@@ -52,7 +54,6 @@ for i in range (1,len(sys.argv),2):
 
 
 
-print(perm == True)
 print("parsed commandline args")
 
 start = time.time()
@@ -95,7 +96,7 @@ elif perm > 1:
         Y_perm = np.random.permutation(Y_)
         output = main.gwas(X,K,Y_perm,batch_size)
         min_pval.append(np.min(output[:,0]))
-        print("Elapsed time for permuatation",i+1 ," with p_min", min_pval[i]," is",": ", time.time() - start_perm)
+        print("Elapsed time for permuatation",i+1 ," with p_min", min_pval[i]," is",": ", round(time.time() - start_perm,2))
         my_time.append(time.time()-start_perm)
     pd.DataFrame({
         'time': my_time ,
@@ -105,10 +106,11 @@ elif perm > 1:
 print("done")
  
 end = time.time()
-print(end - start)
+eltime = np.round(end -start,2)
 
-
-
-K_file = '../kinship_ibs_binary_mac5.h5py'
-X_file = '../all_chromosomes_binary.hdf5'
-Y_file = 'datasets/Mean(P2)_C/phenotype.csv'
+if eltime <= 59:
+    print("Total time elapsed",  eltime, "seconds")
+elif eltime > 59 and eltime <= 3600:
+    print("Total time elapsed",  np.round(eltime / 60,2) , "minutes")
+elif eltime > 3600 :
+    print("Total time elapsed",  np.round(eltime / 60 / 60,2), "hours")
