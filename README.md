@@ -60,7 +60,7 @@ docker build  -t gwas_flow  docker
 ### singularity
 
 ```shell 
-git clone https://github.com/Joyvalley/gwas_tf.git 
+git clone https://github.com/Joyvalley/GWAS_Flow.git 
 
 docker build  -t gwas_flow docker
 
