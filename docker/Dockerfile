@@ -39,7 +39,7 @@ RUN conda install numpy
 RUN conda install pandas
 RUN pip install limix
 RUN conda install h5py
-
+RUN conda install -c conda-forge pandas-plink          
 
 ADD gwas.py .
 ADD herit.py .
@@ -48,11 +48,11 @@ ADD main.py .
 WORKDIR /data
 ENTRYPOINT ["python","-u","/home/ubuntu/gwas.py"]
 
-# docker build  -t tf_image  docker
+# docker build  -t gwas_flow  docker
 
 ### Run docker container
 ## docker run --rm -u $UID:$GID -v $PWD:/data gwas_flow:latest  -x gwas_sample_data/AT_geno.hdf5 -y gwas_sample_data/phenotype.csv -k gwas_sample_data/kinship_ibs_binary_mac5.h5py
 
 ### Build singulartiy container from docker container locally 
 
-## docker run -v /var/run/docker.sock:/var/run/docker.sock -v /home/joyvalley/PHD/Projects/gwastf:/output --privileged -t singularityware/docker2singularity:1.11 tf_image:latest
+## docker run -v /var/run/docker.sock:/var/run/docker.sock -v ../GWAS_Flow:/output --privileged -t singularityware/docker2singularity:1.11 tf_image:latest

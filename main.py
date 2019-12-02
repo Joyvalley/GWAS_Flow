@@ -1,5 +1,6 @@
 import pandas as pd 
 import numpy as np
+import sys
 from scipy.stats import f
 import tensorflow as tf
 import limix
@@ -7,7 +8,11 @@ import herit
 import h5py
 import limix
 import multiprocessing as mlt
+from pandas_plink import read_plink
 
+
+   
+       
 def load_and_prepare_data(X_file,Y_file,K_file,m,cof_file):
     type_K = K_file.split(".")[-1]
     type_X = X_file.split(".")[-1]
@@ -24,8 +29,14 @@ def load_and_prepare_data(X_file,Y_file,K_file,m,cof_file):
         markers = X.columns.values
         acc_X = X.index
         X = np.asarray(X,dtype=np.float32)/2
+    elif type_X.lower() == 'plink':
+        my_prefix = X_file.split(".")[0]
+        (bim,fam,bed) = read_plink(my_prefix)
+        acc_X = np.array(fam[['fid']],dtype=np.int).flatten()
+        markers = np.array(bim[['snp']]).flatten()
+        
     else :
-        sys.exit("Only hdf5, h5py and csv files are supported")
+        sys.exit("Only hdf5, h5py, plink and csv files are supported")
       
     if type_K == 'hdf5' or type_K == 'h5py':
         k = h5py.File(K_file,'r')
@@ -56,6 +67,12 @@ def load_and_prepare_data(X_file,Y_file,K_file,m,cof_file):
     if type_X == 'hdf5' or type_X == 'h5py' :
         X = np.asarray(SNP['snps'][0:(len(SNP['snps'])+1),],dtype=np.float32)[:,idx_acc].T
         X = X[np.argsort(acc_X[idx_acc]),:]
+        k1 = np.asarray(k['kinship'][:])[idk_acc,:]
+        K  = k1[:,idk_acc]
+        K = K[np.argsort(acc_X[idx_acc]),:]
+        K = K[:,np.argsort(acc_X[idx_acc])]
+    elif type_X.lower() == 'plink':
+        X = np.asarray(bed.compute()/2,dtype=np.float32)[:,idx_acc].T
         k1 = np.asarray(k['kinship'][:])[idk_acc,:]
         K  = k1[:,idk_acc]
         K = K[np.argsort(acc_X[idx_acc]),:]

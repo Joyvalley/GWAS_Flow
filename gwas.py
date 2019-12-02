@@ -7,15 +7,15 @@ import main
 import h5py
 
 # set defaults 
-mac_min = 1
+mac_min = 75
 batch_size =  500000 
 out_file = "results.csv"
 m = 'phenotype_value'
 perm = 1
 mac_min= 6
 
-X_file = 'gwas_sample_data/AT_geno.hdf5'
-Y_file = 'gwas_sample_data/phenotype.csv'
+X_file = 'gwas_sample_data/bla.plink'
+Y_file = 'gwas_sample_data/pheno2.csv'
 K_file = 'gwas_sample_data/kinship_ibs_binary_mac5.h5py'
 cof_file = 0 
 cof = "nan"
@@ -75,6 +75,10 @@ if perm == 1:
     output = main.gwas(X,K,Y_,batch_size,cof)   
     if( X_file.split(".")[-1] == 'csv'):
         chr_pos = np.array(list(map(lambda x : x.split("- "),markers_used)))
+    elif X_file.split(".")[-1].lower() == 'plink':
+         my_chr = [i.split("r")[1] for i in [i.split("_")[0] for i in  markers_used]]
+         my_pos = [i.split("_")[1] for i in  markers_used]
+         chr_pos = np.vstack((my_chr,my_pos)).T      
     else: 
         chr_reg = h5py.File(X_file,'r')['positions'].attrs['chr_regions']
         mk_index= np.array(range(len(markers)),dtype=int)[macs >= mac_min]

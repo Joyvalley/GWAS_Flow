@@ -7,22 +7,26 @@ import main
 import h5py
 
 # set defaults 
-mac_min = 1
+mac_min = 75
 batch_size =  500000 
 out_file = "results.csv"
 m = 'phenotype_value'
 perm = 1
 mac_min= 6
 
-X_file = 'gwas_sample_data/AT_geno.hdf5'
-Y_file = 'gwas_sample_data/phenotype.csv'
+X_file = 'gwas_sample_data/bla.plink'
+Y_file = 'gwas_sample_data/pheno2.csv'
 K_file = 'gwas_sample_data/kinship_ibs_binary_mac5.h5py'
+cof_file = 0 
+cof = "nan"
 
 
 
 for i in range (1,len(sys.argv),2):
     if sys.argv[i] == "-x" or sys.argv[i] == "--genotype":
         X_file = sys.argv[i+1]
+    elif sys.argv[i] == "--cof" :
+        cof_file = sys.argv[i+1]
     elif sys.argv[i] == "-y" or sys.argv[i] == "--phenotype":
         Y_file = sys.argv[i+1]
     elif sys.argv[i] == "-k" or sys.argv[i] == "--kinship":
@@ -36,7 +40,7 @@ for i in range (1,len(sys.argv),2):
     elif sys.argv[i] == "-p" or sys.argv[i] == "--perm":
         perm  = int(sys.argv[i+1])
     elif sys.argv[i] == "-o" or sys.argv[i] == "--out":
-        out_file = sys.argv[i+1]
+        out_file = sys.argv[i+1]       
     elif sys.argv[i] == "-h" or sys.argv[i] == "--help":
         print("-x , --genotype :file containing marker information in csv or hdf5 format of size")
         print("-y , --phenotype: file container phenotype information in csv format"  )
@@ -58,7 +62,7 @@ print("parsed commandline args")
 
 start = time.time()
 
-X,K,Y_,markers = main.load_and_prepare_data(X_file,Y_file,K_file,m)
+X,K,Y_,markers,cof = main.load_and_prepare_data(X_file,Y_file,K_file,m,cof_file)
 
 
 ## MAF filterin
@@ -68,9 +72,13 @@ markers_used , X , macs = main.mac_filter(mac_min,X,markers)
 print("Begin performing GWAS on ", Y_file)
 
 if perm == 1:
-    output = main.gwas(X,K,Y_,batch_size)   
+    output = main.gwas(X,K,Y_,batch_size,cof)   
     if( X_file.split(".")[-1] == 'csv'):
         chr_pos = np.array(list(map(lambda x : x.split("- "),markers_used)))
+    elif X_file.split(".")[-1].lower() == 'plink':
+         my_chr = [i.split("r")[1] for i in [i.split("_")[0] for i in  markers_used]]
+         my_pos = [i.split("_")[1] for i in  markers_used]
+         chr_pos = np.vstack((my_chr,my_pos)).T      
     else: 
         chr_reg = h5py.File(X_file,'r')['positions'].attrs['chr_regions']
         mk_index= np.array(range(len(markers)),dtype=int)[macs >= mac_min]
@@ -94,7 +102,7 @@ elif perm > 1:
         perm_seeds.append(my_seed)
         np.random.seed(my_seed)
         Y_perm = np.random.permutation(Y_)
-        output = main.gwas(X,K,Y_perm,batch_size)
+        output = main.gwas(X,K,Y_perm,batch_size,cof)
         min_pval.append(np.min(output[:,0]))
         print("Elapsed time for permuatation",i+1 ," with p_min", min_pval[i]," is",": ", round(time.time() - start_perm,2))
         my_time.append(time.time()-start_perm)
@@ -114,3 +122,6 @@ elif eltime > 59 and eltime <= 3600:
     print("Total time elapsed",  np.round(eltime / 60,2) , "minutes")
 elif eltime > 3600 :
     print("Total time elapsed",  np.round(eltime / 60 / 60,2), "hours")
+
+end = time.time()
+
