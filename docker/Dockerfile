@@ -33,7 +33,7 @@ ENV PATH /home/ubuntu/miniconda3/bin:$PATH
 
 # Updating Anaconda packages
 RUN conda update conda
-RUN conda install tensorflow
+RUN conda install tensorflow==1.14
 RUN conda install scipy
 RUN conda install numpy
 RUN conda install pandas

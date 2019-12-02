@@ -20,6 +20,8 @@ K_file = 'gwas_sample_data/kinship_ibs_binary_mac5.h5py'
 cof_file = 0 
 cof = "nan"
 
+
+
 for i in range (1,len(sys.argv),2):
     if sys.argv[i] == "-x" or sys.argv[i] == "--genotype":
         X_file = sys.argv[i+1]
@@ -118,3 +120,4 @@ elif eltime > 3600 :
     print("Total time elapsed",  np.round(eltime / 60 / 60,2), "hours")
 
 end = time.time()
+

@@ -1,5 +1,11 @@
 # GWAS_Flow
 
+## Citing
+`GWAS-Flow` was written and published in the hope that you might find it useful. If you do and use it for your research please cite the paper published alongside the software, which is currently publicly accessible on the BiorXiv preprint server. https://www.biorxiv.org/content/10.1101/783100v1  doi: 10.1101/783100 
+
+
+
+
 ## Introduction 
 
 `GWAS_Flow` is an open source python based software provding a GPU-accelerated framework for performing genome-wide association studies (GWAS), published under the MIT-License. 
@@ -27,6 +33,7 @@ Here we use TensorFlow a framework that is commonly used for machine learning ap
 ## Installation 
 
 ### git and anaconda 
+This has been tested on multiple linux systems with anconda versions > 4.7 
 
 clone the repository directly with git 
 
@@ -53,7 +60,7 @@ docker build  -t gwas_flow  docker
 ### singularity
 
 ```shell 
-git clone https://github.com/Joyvalley/gwas_tf.git 
+git clone https://github.com/Joyvalley/GWAS_Flow.git 
 
 docker build  -t gwas_flow docker
 
