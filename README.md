@@ -77,6 +77,13 @@ Make sure to have all the required packages installed
 python gwas.py -x gwas_sample_data/AT_geno.hdf5 -y gwas_sample_data/phenotype.csv -k gwas_sample_data/kinship_ibs_binary_mac5.h5py
 
 ```
+To execute with csv input data and cofactors 
+
+```shell
+python gwas.py -x gwas_sample_data/G_sample.csv -y gwas_sample_data/Y_sample.csv -k gwas_sample_data/K_sample.csv --cof gwas_sample_data/cof.csv
+
+```
+
 
 Flgas and options are 	
 ```shell
@@ -84,6 +91,7 @@ Flgas and options are
 -y , --phenotype : file container phenotype information in csv format
 -k , --kinship : file containing kinship matrix of size k X k in csv or hdf5 format
 -m : name of column to be used in phenotype file. Default m='phenotype_value' 
+--cof: file with cofactor information (only one co-factor as of now)
 -a , --mac_min : integer specifying the minimum minor allele count necessary for a marker to be included. Default a = 1
 -bs, --batch-size : integer specifying the number of markers processed at once. Default -bs 500000
 -p , --perm : 
