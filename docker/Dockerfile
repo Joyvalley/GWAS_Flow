@@ -39,7 +39,7 @@ RUN conda install numpy
 RUN conda install pandas
 RUN pip install limix
 RUN conda install h5py
-
+RUN conda install -c conda-forge pandas-plink          
 
 ADD gwas.py .
 ADD herit.py .

@@ -5,7 +5,6 @@
 
 
 
-
 ## Introduction 
 
 `GWAS_Flow` is an open source python based software provding a GPU-accelerated framework for performing genome-wide association studies (GWAS), published under the MIT-License. 
@@ -83,6 +82,14 @@ To execute with csv input data and cofactors
 python gwas.py -x gwas_sample_data/G_sample.csv -y gwas_sample_data/Y_sample.csv -k gwas_sample_data/K_sample.csv --cof gwas_sample_data/cof.csv
 
 ```
+
+To use PLINK data format add a bed bim and fam file with the same prefix to the folder. You can tell GWAS-Flow to use those files by using prefix.plink as the option for the genotype file
+
+```shell
+python gwas.py -x gwas_sample_data/my_plink.plink -y gwas_sample_data/pheno2.csv -k gwas_sample_data/kinship_ibs_binary_mac5.h5py
+```
+
+
 
 
 Flgas and options are 	
