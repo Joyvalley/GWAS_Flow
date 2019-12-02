@@ -46,6 +46,7 @@ conda create -n gwas_flow python=3.7.3
 conda activate gwas_flow
 conda install tensorflow==1.14 # conda install tensorflow-gpu==1.14 for gpu usage
 conda install scipy pandas numpy h5py
+conda install -c conda-forge pandas-plink  
 pip install limix
 ```
 
