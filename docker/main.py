@@ -12,9 +12,16 @@ from pandas_plink import read_plink
 
 
    
-       
-def load_and_prepare_data(X_file,Y_file,K_file,m,cof_file):
-    type_K = K_file.split(".")[-1]
+def load_and_prepare_data(X_file,Y_file,K_file,m,cof_file):  
+    def kinship(M):
+        mafs = np.sum(M,axis=0)/M.shape[0]
+        P = np.repeat(mafs,M.shape[0]).reshape(M.shape[0],M.shape[1],order="F")
+        Z = M - P
+        K = (np.matmul(Z , Z.T))  / (2 * np.sum(mafs*(1-mafs)))
+        return K
+
+    if K_file != 'not_prov':
+        type_K = K_file.split(".")[-1]
     type_X = X_file.split(".")[-1]
 
         ## load and preprocess genotype matrix 
@@ -33,25 +40,31 @@ def load_and_prepare_data(X_file,Y_file,K_file,m,cof_file):
         my_prefix = X_file.split(".")[0]
         (bim,fam,bed) = read_plink(my_prefix)
         acc_X = np.array(fam[['fid']],dtype=np.int).flatten()
-        markers = np.array(bim[['snp']]).flatten()
-        
+        markers = np.array(bim[['snp']]).flatten()       
     else :
         sys.exit("Only hdf5, h5py, plink and csv files are supported")
-      
-    if type_K == 'hdf5' or type_K == 'h5py':
-        k = h5py.File(K_file,'r')
-        acc_K = np.asarray(k['accessions'][:],dtype=np.int)
-    elif type_K == 'csv':
-        k = pd.read_csv(K_file,index_col=0)
-        acc_K = k.index
-        k = np.array(k, dtype=np.float32)
+    if K_file != 'not_prov':  
+        if type_K == 'hdf5' or type_K == 'h5py':
+            k = h5py.File(K_file,'r')
+            acc_K = np.asarray(k['accessions'][:],dtype=np.int)
+        elif type_K == 'csv':
+            k = pd.read_csv(K_file,index_col=0)
+            acc_K = k.index
+            k = np.array(k, dtype=np.float32)
 
     acc_Y =  np.asarray(Y[['accession_id']]).flatten()
     acc_isec = [isec for isec in acc_X if isec in acc_Y]
            
     idx_acc = list(map(lambda x: x in acc_isec, acc_X))
     idy_acc = list(map(lambda x: x in acc_isec, acc_Y))
-    idk_acc = list(map(lambda x: x in acc_isec, acc_K))
+    if K_file != 'not_prov':
+        idk_acc = list(map(lambda x: x in acc_isec, acc_K))
+    else:
+        print(X.shape)
+        k = kinship(X)
+        idk_acc = idx_acc
+       
+        
     cof = 0
     if cof_file != 0 :
         cof = pd.read_csv(cof_file,index_col=0)
@@ -94,6 +107,9 @@ def mac_filter(mac_min, X, markers):
     markers_used  = markers[macs >= mac_min]
     X = X[:,macs >= mac_min]
     return markers_used, X, macs
+
+
+
 
 def gwas(X,K,Y,batch_size,cof):
     n_marker = X.shape[1]
