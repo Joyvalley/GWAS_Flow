@@ -53,6 +53,7 @@ for i in range (1,len(sys.argv),2):
         print("-p , --perm : single integer specifying the number of permutations. Default 1 == no perm ")
         print("-o , --out : name of output file. Default -o results.csv  ")
         print("-h , --help : prints help and command line options")
+        print("--plot: creates manhattan plot")
         quit()
     else:
         print('unknown option ' + str(sys.argv[i]))
@@ -60,7 +61,7 @@ for i in range (1,len(sys.argv),2):
 
 
 
-print("parsed commandline args")
+print("parsed commandline arguments")
 
 start = time.time()
 
