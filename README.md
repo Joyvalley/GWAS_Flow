@@ -102,7 +102,8 @@ Flgas and options are
 --cof: file with cofactor information (only one co-factor as of now)
 -a , --mac_min : integer specifying the minimum minor allele count necessary for a marker to be included. Default a = 1
 -bs, --batch-size : integer specifying the number of markers processed at once. Default -bs 500000
--p , --perm : 
+-p , --perm : perform n permutations
+--plot : create manhattanplot 
 -o , --out : name of output file. Default -o results.csv  
 -h , --help : prints help and command line options
 ```
@@ -122,6 +123,11 @@ Execute the singularity image with the sample data
 ```shell
 singularity run  gwas_flow_sing.img -x gwas_sample_data/AT_geno.hdf5 -y gwas_sample_data/phenotype.csv -k gwas_sample_data/kinship_ibs_binary_mac5.h5py
 ```
+
+Manhattan plot 
+
+![manhattan](https://user-images.githubusercontent.com/26280192/71103427-6a57e400-21ba-11ea-8eab-aa40abcc46ec.png)
+
 
 
 ## Performance Benchmarking and Recommendations
