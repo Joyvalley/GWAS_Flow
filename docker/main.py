@@ -60,8 +60,6 @@ def load_and_prepare_data(X_file,Y_file,K_file,m,cof_file):
     if K_file != 'not_prov':
         idk_acc = list(map(lambda x: x in acc_isec, acc_K))
     else:
-        print(X.shape)
-        k = kinship(X)
         idk_acc = idx_acc
        
         
@@ -80,20 +78,29 @@ def load_and_prepare_data(X_file,Y_file,K_file,m,cof_file):
     if type_X == 'hdf5' or type_X == 'h5py' :
         X = np.asarray(SNP['snps'][0:(len(SNP['snps'])+1),],dtype=np.float32)[:,idx_acc].T
         X = X[np.argsort(acc_X[idx_acc]),:]
-        k1 = np.asarray(k['kinship'][:])[idk_acc,:]
-        K  = k1[:,idk_acc]
-        K = K[np.argsort(acc_X[idx_acc]),:]
-        K = K[:,np.argsort(acc_X[idx_acc])]
+        if K_file != 'not_prov':
+            k1 = np.asarray(k['kinship'][:])[idk_acc,:]
+            K  = k1[:,idk_acc]
+            K = K[np.argsort(acc_X[idx_acc]),:]
+            K = K[:,np.argsort(acc_X[idx_acc])]
+        else: 
+            K = kinship(X)          
     elif type_X.lower() == 'plink':
         X = np.asarray(bed.compute()/2,dtype=np.float32)[:,idx_acc].T
-        k1 = np.asarray(k['kinship'][:])[idk_acc,:]
-        K  = k1[:,idk_acc]
-        K = K[np.argsort(acc_X[idx_acc]),:]
-        K = K[:,np.argsort(acc_X[idx_acc])]
+        if K_file != 'not_prov' : 
+            k1 = np.asarray(k['kinship'][:])[idk_acc,:]
+            K  = k1[:,idk_acc]
+            K = K[np.argsort(acc_X[idx_acc]),:]
+            K = K[:,np.argsort(acc_X[idx_acc])]
+        else:
+            K = kinship(X)
     else:
         X  = X[idx_acc,:]
-        k1 = k[idk_acc,:]
-        K  = k1[:,idk_acc]
+        if K_file != 'not_prov':
+            k1 = k[idk_acc,:]
+            K  = k1[:,idk_acc]
+        else:
+            K = kinship(X)
         
        
     print("data has been imported")

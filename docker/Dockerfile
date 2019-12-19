@@ -40,10 +40,12 @@ RUN conda install pandas
 RUN pip install limix
 RUN conda install h5py
 RUN conda install -c conda-forge pandas-plink          
+RUN conda install -c conda-forge matplotlib 
 
 ADD gwas.py .
 ADD herit.py .
 ADD main.py .
+ADD plot.py .
 
 WORKDIR /data
 ENTRYPOINT ["python","-u","/home/ubuntu/gwas.py"]
