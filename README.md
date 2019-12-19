@@ -17,6 +17,8 @@ Here we use TensorFlow a framework that is commonly used for machine learning ap
 
 ### Required Software
 - [python](https://www.python.org/ "Python programming language") (v.3.7.3)
+- [anaconda](https://www.anaconda.com/ "Anaconda virtual environments")
+- [git](https://git-scm.com/)
 
 ### Required python packages
 - [tensorflow](https://www.tensorflow.org/ "tensorflow") (v.1.14.0)
@@ -24,6 +26,7 @@ Here we use TensorFlow a framework that is commonly used for machine learning ap
 - [pandas](https://pandas.pydata.org/ "import and manipulate data frames")(v.24.2)
 - [scipy](https://www.scipy.org/ "scientific python") (v.1.3.0)
 - [h5py](https://www.h5py.org/ "import and manipulated hdf files") (v.2.9.0)
+- [matplotlib](https://matplotlib.org/ "plot library for python")
 
 ### Docker and Singularity
 - [Docker](https://www.docker.com/) (v.19.03.1)
@@ -41,16 +44,19 @@ git clone https://github.com/Joyvalley/GWAS_Flow
 ``` 
 
 create an anaconda environment and install the necessary packages
+
 ```shell
 conda create -n gwas_flow python=3.7.3
 conda activate gwas_flow
-conda install tensorflow==1.14 # conda install tensorflow-gpu==1.14 for gpu usage
-conda install scipy pandas numpy h5py
-conda install -c conda-forge pandas-plink  
+conda install -y tensorflow==1.14 # conda install tensorflow-gpu==1.14 for gpu usage
+conda install -y scipy pandas numpy h5py
+conda install -y -c conda-forge pandas-plink 
+conda install -y -c conda-forge matplotlib 
 pip install limix
 ```
 
 ### docker 
+For the installation with docker the only required software is docker itself.
 
 ```shell 
 git clone https://github.com/Joyvalley/GWAS_Flow.git 
@@ -69,28 +75,29 @@ docker run -v /var/run/docker.sock:/var/run/docker.sock -v /PATH/TO/FOLDER:/outp
 change the name of e.g. gwas_flow_latest-2019-08-19-8c98f492dd54.img to gwas_flow_sing.img
 ```
 
-## Execution 
-To run the gwas with default settings and the sample data provided in gwas_sample_data/ 
-Make sure to have all the required packages installed 
+## Execution with anaconda installation
+### Input data 
+GWAS_Flow is designed to work with several different input data formats. For all of them there is are sample data avaialble in the folder gwas_sample_data/
+The minimal requirement is to provide a genotype and a phenotype file if no kinship matrix is provided a kinship matrix according to van Raden ist caluculated from the provided marker information. Depending on the size of the marker matrix this can take a while.
+
+#### hdf5 input
 
 ```shell
 python gwas.py -x gwas_sample_data/AT_geno.hdf5 -y gwas_sample_data/phenotype.csv -k gwas_sample_data/kinship_ibs_binary_mac5.h5py
 
 ```
-To execute with csv input data and cofactors 
+#### csv input 
 
 ```shell
-python gwas.py -x gwas_sample_data/G_sample.csv -y gwas_sample_data/Y_sample.csv -k gwas_sample_data/K_sample.csv --cof gwas_sample_data/cof.csv
+python gwas.py -x gwas_sample_data/G_sample.csv -y gwas_sample_data/Y_sample.csv -k gwas_sample_data/K_sample.csv
 
 ```
-
+#### plink input
 To use PLINK data format add a bed bim and fam file with the same prefix to the folder. You can tell GWAS-Flow to use those files by using prefix.plink as the option for the genotype file
 
 ```shell
 python gwas.py -x gwas_sample_data/my_plink.plink -y gwas_sample_data/pheno2.csv -k gwas_sample_data/kinship_ibs_binary_mac5.h5py
 ```
-
-
 
 
 Flgas and options are 	
@@ -124,9 +131,17 @@ Execute the singularity image with the sample data
 singularity run  gwas_flow_sing.img -x gwas_sample_data/AT_geno.hdf5 -y gwas_sample_data/phenotype.csv -k gwas_sample_data/kinship_ibs_binary_mac5.h5py
 ```
 
-Manhattan plot 
+### furter options 
+#### Permutation
+add the flag `--perm 100` to calculate a significance threshold based on 100 permutations. Change 100 to any integer larger 2 to perform n permutations
+
+#### Manhattan plot 
+By default there is no plot generated if you add `--plot True` a manhattan plot is generated
 
 ![manhattan](https://user-images.githubusercontent.com/26280192/71103427-6a57e400-21ba-11ea-8eab-aa40abcc46ec.png)
+
+The dash-dotted line is the bonferroni threshold of significance and the dashed line the permutation based threshold
+The latter is only calculated if the flag `--perm n` was used with n > 2.
 
 
 
