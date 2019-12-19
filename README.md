@@ -131,7 +131,15 @@ Execute the singularity image with the sample data
 singularity run  gwas_flow_sing.img -x gwas_sample_data/AT_geno.hdf5 -y gwas_sample_data/phenotype.csv -k gwas_sample_data/kinship_ibs_binary_mac5.h5py
 ```
 
-### furter options 
+### further options 
+#### Co-factor
+So far GWAS-Flow is capable of using on co-factor the co-factor is added to the analysis with the flag `--cof FILENAME` 
+e.g 
+```shell
+ python gwas.py -x gwas_sample_data/G_sample.csv -y gwas_sample_data/Y_sample.csv -k gwas_sample_data/K_sample.csv --cof gwas_sample_data/cof.csv 
+```
+
+
 #### Permutation
 add the flag `--perm 100` to calculate a significance threshold based on 100 permutations. Change 100 to any integer larger 2 to perform n permutations
 
