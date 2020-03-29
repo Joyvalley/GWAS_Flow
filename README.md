@@ -60,6 +60,7 @@ For the installation with docker the only required software is docker itself.
 
 ```shell 
 git clone https://github.com/Joyvalley/GWAS_Flow.git 
+cd GWAS_Flow
 docker build  -t gwas_flow  docker
 ```
 
