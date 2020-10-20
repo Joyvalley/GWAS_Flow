@@ -97,6 +97,7 @@ def load_and_prepare_data(X_file,Y_file,K_file,m,cof_file):
     else:
         X  = X[idx_acc,:]
         if K_file != 'not_prov':
+            print(k.shape)
             k1 = k[idk_acc,:]
             K  = k1[:,idk_acc]
         else:

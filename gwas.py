@@ -12,7 +12,7 @@ batch_size =  500000
 out_file = "results.csv"
 m = 'phenotype_value'
 perm = 1
-mac_min= 6
+mac_min= 1
 
 X_file = 'gwas_sample_data/bla.plink'
 Y_file = 'gwas_sample_data/pheno2.csv'
