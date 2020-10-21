@@ -1,6 +1,7 @@
 import pandas as pd 
 import numpy as np
 import sys
+import os 
 from scipy.stats import f
 import tensorflow as tf
 import limix
@@ -97,12 +98,10 @@ def load_and_prepare_data(X_file,Y_file,K_file,m,cof_file):
     else:
         X  = X[idx_acc,:]
         if K_file != 'not_prov':
-            print(k.shape)
             k1 = k[idk_acc,:]
             K  = k1[:,idk_acc]
         else:
             K = kinship(X)
-        
        
     print("data has been imported")
     return X,K,Y_,markers,cof
@@ -138,7 +137,7 @@ def gwas(X,K,Y,batch_size,cof):
         cof_t = np.sum(np.multiply(np.transpose(M),cof),axis=1).astype(np.float32)
     
     ## EMMAX Scan
-    RSS_env = (np.linalg.lstsq(np.reshape(int_t,(n,-1)) , np.reshape(Y_t,(n,-1)))[1]).astype(np.float32)
+    RSS_env = (np.linalg.lstsq(np.reshape(int_t,(n,-1)) , np.reshape(Y_t,(n,-1)),rcond=None)[1]).astype(np.float32)
     ## calculate betas and se of betas 
     def stderr(a,M,Y_t2d,int_t):
         x = tf.stack((int_t,tf.squeeze(tf.matmul(M.T,tf.reshape(a,(n,-1))))),axis=1)
@@ -162,7 +161,7 @@ def gwas(X,K,Y,batch_size,cof):
     
     ## loop over the batches 
     for i in range(int(np.ceil(n_marker/batch_size))):
-        tf.reset_default_graph()
+        tf.compat.v1.reset_default_graph()
         if n_marker < batch_size:
             X_sub = X
         else:
@@ -174,11 +173,11 @@ def gwas(X,K,Y,batch_size,cof):
             else:
                 X_sub = X[:,lower_limit:]
                 print("Working on markers ", lower_limit , " to ", n_marker, " of ", n_marker )    
-        config = tf.ConfigProto()
+        config = tf.compat.v1.ConfigProto()
         n_cores = mlt.cpu_count()
         config.intra_op_parallelism_threads = n_cores
         config.inter_op_parallelism_threads = n_cores
-        sess = tf.Session(config=config)                                             
+        sess = tf.compat.v1.Session(config=config)                                             
         Y_t2d = tf.cast(tf.reshape(Y_t,(n,-1)),dtype=tf.float32)                     
         y_tensor =  tf.convert_to_tensor(Y_t,dtype = tf.float32)                                      
         StdERR = tf.map_fn(lambda a : stderr(a,M,Y_t2d,int_t), X_sub.T)              

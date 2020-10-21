@@ -13,13 +13,11 @@ out_file = "results.csv"
 m = 'phenotype_value'
 perm = 1
 mac_min= 1
-
-X_file = 'gwas_sample_data/bla.plink'
-Y_file = 'gwas_sample_data/pheno2.csv'
-K_file = 'not_prov'
 cof_file = 0 
 cof = "nan"
 plot = False 
+
+
 
 
 for i in range (1,len(sys.argv),2):

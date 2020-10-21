@@ -43,18 +43,13 @@ clone the repository directly with git
 git clone https://github.com/Joyvalley/GWAS_Flow
 ``` 
 
-create an anaconda environment and install the necessary packages
+create an anaconda environment and install the necessary packages using the gwas_flow_env.yaml configuration file
 
 ```shell
-conda create -n gwas_flow python=3.7.3
+conda env create -f gwas_flow_env.yaml
 conda activate gwas_flow
-conda install -y tensorflow==1.14 # conda install tensorflow-gpu==1.14 for gpu usage
-conda install -y scipy=1.2.1
-conda install -y pandas==1.0.1 
-conda install -y numpy h5py
-conda install -y -c conda-forge pandas-plink 
-conda install -y -c conda-forge matplotlib 
-pip install limix
+
+
 ```
 
 ### docker 
