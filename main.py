@@ -120,6 +120,7 @@ def mac_filter(mac_min, X, markers):
 
 
 def gwas(X,K,Y,batch_size,cof):
+    Y = Y.flatten()
     n_marker = X.shape[1]
     n = len(Y)
     ## REML   
