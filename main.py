@@ -177,6 +177,7 @@ def getR1Full(M,Y_t2d,int_t,X_sub):
      return tf.map_fn(lambda a: rss(a,M,Y_t2d,int_t), X_sub.T)
 
 def gwas(X,K,Y,batch_size,cof):
+    with open("test_data/cof_test",'wb') as f: pickle.dump(cof, f)
     Y = Y.flatten()
     n_marker = X.shape[1]
     n = len(Y)
@@ -231,6 +232,7 @@ def gwas(X,K,Y,batch_size,cof):
         F_dist = output[:,0]
     pval  = getPval(F_dist,n)
     output[:,0] = pval
+    with open("test_data/cof_output",'wb') as f: pickle.dump(output, f)
     return output 
 
 
