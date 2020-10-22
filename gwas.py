@@ -6,16 +6,16 @@ import pandas as pd
 import main
 import h5py
 
-# set defaults 
+# set defaults
 mac_min = 75
-batch_size =  500000 
+batch_size =  500000
 out_file = "results.csv"
 m = 'phenotype_value'
 perm = 1
 mac_min= 1
-cof_file = 0 
+cof_file = 0
 cof = "nan"
-plot = False 
+plot = False
 K_file = 'not_prov'
 
 
@@ -74,7 +74,7 @@ print("Begin performing GWAS on ", Y_file)
 
 
 output = main.gwas(X,K,Y_,batch_size,cof)   
-if( X_file.split(".")[-1] == 'csv'):
+if(X_file.split(".")[-1] == 'csv'):
     chr_pos = np.array(list(map(lambda x : x.split("- "),markers_used)))
 elif X_file.split(".")[-1].lower() == 'plink':
      my_chr = [i.split("r")[1] for i in [i.split("_")[0] for i in  markers_used]]
