@@ -52,10 +52,10 @@ for i in range (1,len(sys.argv),2):
         print("-o , --out : name of output file. Default -o results.csv  ")
         print("-h , --help : prints help and command line options")
         print("--plot: creates manhattan plot")
-        quit()
+        sys.exit()
     else:
         print('unknown option ' + str(sys.argv[i]))
-        quit()
+        sys.exit()
 
 
 
@@ -77,20 +77,20 @@ output = main.gwas(X,K,Y_,batch_size,cof)
 if(X_file.split(".")[-1] == 'csv'):
     chr_pos = np.array(list(map(lambda x : x.split("- "),markers_used)))
 elif X_file.split(".")[-1].lower() == 'plink':
-     my_chr = [i.split("r")[1] for i in [i.split("_")[0] for i in  markers_used]]
-     my_pos = [i.split("_")[1] for i in  markers_used]
-     chr_pos = np.vstack((my_chr,my_pos)).T      
-else: 
+    my_chr = [i.split("r")[1] for i in [i.split("_")[0] for i in  markers_used]]
+    my_pos = [i.split("_")[1] for i in  markers_used]
+    chr_pos = np.vstack((my_chr,my_pos)).T      
+else:
     chr_reg = h5py.File(X_file,'r')['positions'].attrs['chr_regions']
     mk_index= np.array(range(len(markers)),dtype=int)[macs >= mac_min]
     chr_pos = np.array([list(map(lambda x: sum(x > chr_reg[:,1]) + 1, mk_index)), markers_used]).T
     my_time = np.repeat((time.time()-start),len(chr_pos))
 res = pd.DataFrame({
-    'chr' : chr_pos[:,0] ,
-    'pos' : chr_pos[:,1] , 
-    'pval': output[:,0] ,
-    'mac' : np.array(macs[macs >= mac_min],dtype=np.int) ,
-    'eff_size': output[:,1] ,
+    'chr' : chr_pos[:,0],
+    'pos' : chr_pos[:,1],
+    'pval': output[:,0],
+    'mac' : np.array(macs[macs >= mac_min],dtype=np.int),
+    'eff_size': output[:,1],
     'SE' : output[:,2]})
 res.to_csv(out_file,index=False)
 if perm > 1:
@@ -117,12 +117,11 @@ if perm > 1:
 
 
 if plot == True:
-    import plot 
+    import plot
     plot.manhattan(out_file,perm)
 
-    
+
 print("Finished performing GWAS")
- 
 end = time.time()
 eltime = np.round(end -start,2)
 

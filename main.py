@@ -1,4 +1,4 @@
-import pandas as pd 
+import pandas as pd
 import numpy as np
 import sys
 from scipy.stats import f
@@ -11,19 +11,20 @@ from pandas_plink import read_plink
 import pickle
 
 def kinship(M):
-        mafs = np.sum(M,axis=0)/M.shape[0]
-        P = np.repeat(mafs,M.shape[0]).reshape(M.shape[0],M.shape[1],order="F")
-        Z = M - P
-        K = (np.matmul(Z , Z.T))  / (2 * np.sum(mafs*(1-mafs)))
-        return K
+    mafs = np.sum(M,axis=0)/M.shape[0]
+    P = np.repeat(mafs,M.shape[0]).reshape(M.shape[0],M.shape[1],order="F")
+    Z = M - P
+    K = (np.matmul(Z , Z.T))  / (2 * np.sum(mafs*(1-mafs)))
+    return K
 
-def load_and_prepare_data(X_file,Y_file,K_file,m,cof_file):  
+def load_and_prepare_data(X_file,Y_file,K_file,m,cof_file):
     if K_file != 'not_prov':
         type_K = K_file.split(".")[-1]
     type_X = X_file.split(".")[-1]
 
-        ## load and preprocess genotype matrix 
-    Y = pd.read_csv(Y_file,engine='python').sort_values(['accession_id']).groupby('accession_id').mean()
+        ## load and preprocess genotype matrix
+    Y = pd.read_csv(Y_file,engine='python').sort_values(['accession_id'])
+    Y = Y.groupby('accession_id').mean()
     Y = pd.DataFrame({'accession_id' :  Y.index, 'phenotype_value' : Y[m]})
     if type_X == 'hdf5' or type_X == 'h5py'  :
         SNP = h5py.File(X_file,'r')
@@ -38,10 +39,10 @@ def load_and_prepare_data(X_file,Y_file,K_file,m,cof_file):
         my_prefix = X_file.split(".")[0]
         (bim,fam,bed) = read_plink(my_prefix)
         acc_X = np.array(fam[['fid']],dtype=np.int).flatten()
-        markers = np.array(bim[['snp']]).flatten()       
+        markers = np.array(bim[['snp']]).flatten()
     else :
         sys.exit("Only hdf5, h5py, plink and csv files are supported")
-    if K_file != 'not_prov':  
+    if K_file != 'not_prov':
         if type_K == 'hdf5' or type_K == 'h5py':
             k = h5py.File(K_file,'r')
             acc_K = np.asarray(k['accessions'][:],dtype=np.int)
@@ -52,14 +53,13 @@ def load_and_prepare_data(X_file,Y_file,K_file,m,cof_file):
 
     acc_Y =  np.asarray(Y[['accession_id']]).flatten()
     acc_isec = [isec for isec in acc_X if isec in acc_Y]
-           
+
     idx_acc = list(map(lambda x: x in acc_isec, acc_X))
     idy_acc = list(map(lambda x: x in acc_isec, acc_Y))
     if K_file != 'not_prov':
         idk_acc = list(map(lambda x: x in acc_isec, acc_K))
     else:
         idk_acc = idx_acc
-       
         
     cof = 0
     if cof_file != 0 :
@@ -69,8 +69,7 @@ def load_and_prepare_data(X_file,Y_file,K_file,m,cof_file):
         acc_isec = [isec for isec in idc if isec in acc_Y]
         idc_acc = list(map(lambda x: x in acc_isec, idc))
         if not all(idx_acc):
-            print("accessions ids in the covariate file must be identical to the ones in the phenotype file")
-            quit()
+            sys.exit("accessions ids in the covariate file must be identical the phenotype file")            
     Y_ = np.asarray(Y.drop('accession_id',1),dtype=np.float32)[idy_acc,:]
 
     if type_X == 'hdf5' or type_X == 'h5py' :
@@ -115,26 +114,26 @@ def mac_filter(mac_min, X, markers):
 
 ## calculate betas and se of betas 
 def stderr(a,M,Y_t2d,int_t):
-        n = len(int_t)
-        x = tf.stack((int_t,tf.squeeze(tf.matmul(M.T,tf.reshape(a,(n,-1))))),axis=1)
-        coeff = tf.matmul(tf.matmul(tf.linalg.inv(tf.matmul(tf.transpose(x),x)),tf.transpose(x)),Y_t2d)
-        SSE = tf.reduce_sum(tf.math.square(tf.math.subtract(Y_t2d,tf.math.add(tf.math.multiply(x[:,1],coeff[0,0]),tf.math.multiply(x[:,1],coeff[1,0])))))
-        SE = tf.math.sqrt(SSE/(471-(1+2)))
-        StdERR = tf.sqrt(tf.linalg.diag_part(tf.math.multiply(SE , tf.linalg.inv(tf.matmul(tf.transpose(x),x)))))[1]
-        return tf.stack((coeff[1,0],StdERR))
+    n = len(int_t)
+    x = tf.stack((int_t,tf.squeeze(tf.matmul(M.T,tf.reshape(a,(n,-1))))),axis=1)
+    coeff = tf.matmul(tf.matmul(tf.linalg.inv(tf.matmul(tf.transpose(x),x)),tf.transpose(x)),Y_t2d)
+    SSE = tf.reduce_sum(tf.math.square(tf.math.subtract(Y_t2d,tf.math.add(tf.math.multiply(x[:,1],coeff[0,0]),tf.math.multiply(x[:,1],coeff[1,0])))))
+    SE = tf.math.sqrt(SSE/(471-(1+2)))
+    StdERR = tf.sqrt(tf.linalg.diag_part(tf.math.multiply(SE , tf.linalg.inv(tf.matmul(tf.transpose(x),x)))))[1]
+    return tf.stack((coeff[1,0],StdERR))
 
 ## calculate residual sum squares 
 def rss(a,M,Y_t2d,int_t):
-        x_t = tf.reduce_sum(tf.math.multiply(M.T,a),axis=1)
-        lm_res = tf.linalg.lstsq(tf.transpose(tf.stack((int_t,x_t),axis=0)),Y_t2d)
-        lm_x = tf.concat((tf.squeeze(lm_res),x_t),axis=0)
-        return tf.reduce_sum(tf.math.square(tf.math.subtract(tf.squeeze(Y_t2d),tf.math.add(tf.math.multiply(lm_x[1],lm_x[2:]), tf.multiply(lm_x[0],int_t)))))
+    x_t = tf.reduce_sum(tf.math.multiply(M.T,a),axis=1)
+    lm_res = tf.linalg.lstsq(tf.transpose(tf.stack((int_t,x_t),axis=0)),Y_t2d)
+    lm_x = tf.concat((tf.squeeze(lm_res),x_t),axis=0)
+    return tf.reduce_sum(tf.math.square(tf.math.subtract(tf.squeeze(Y_t2d),tf.math.add(tf.math.multiply(lm_x[1],lm_x[2:]), tf.multiply(lm_x[0],int_t)))))
 
 # calculate residual sum squares with co-variates
 def rss_cof(a,M,Y_t2d,int_t,cof_t):
-        x_t = tf.reduce_sum(tf.math.multiply(M.T,a),axis=1)
-        lm_res = tf.linalg.lstsq(tf.transpose(tf.stack((int_t,x_t,cof_t),axis=0)),Y_t2d)
-        return tf.math.reduce_sum(tf.math.square(Y_t2d - (lm_res[1] * x_t + lm_res[0] * int_t + lm_res[2] * cof_t)))
+    x_t = tf.reduce_sum(tf.math.multiply(M.T,a),axis=1)
+    lm_res = tf.linalg.lstsq(tf.transpose(tf.stack((int_t,x_t,cof_t),axis=0)),Y_t2d)
+    return tf.math.reduce_sum(tf.math.square(Y_t2d - (lm_res[1] * x_t + lm_res[0] * int_t + lm_res[2] * cof_t)))
     
 def get_K_stand(K):
     n = K.shape[0]
@@ -187,7 +186,7 @@ def gwas(X,K,Y,batch_size,cof):
     print(" Pseudo-heritability is " , vg / (ve + vg + delta))
     print(" Performing GWAS on ", n , " phenotypes and ", n_marker ,"markers")
     ## Transform kinship-matrix, phenotypes and estimate intercpt
-   #  Xo = np.ones(K.shape[0]).flatten()
+    #  Xo = np.ones(K.shape[0]).flatten()
     M = transform_kinship(vg, K_stand, ve)
     Y_t =   transform_Y(M,Y)
     int_t = transform_int(M)
