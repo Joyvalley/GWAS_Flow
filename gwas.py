@@ -16,7 +16,7 @@ mac_min= 1
 cof_file = 0 
 cof = "nan"
 plot = False 
-
+K_file = 'not_prov'
 
 
 
