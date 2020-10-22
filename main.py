@@ -1,14 +1,15 @@
+import multiprocessing as mlt
 import pandas as pd
 import numpy as np
 import sys
 from scipy.stats import f
 import tensorflow as tf
-import limix
-import herit
-import h5py
-import multiprocessing as mlt
 from pandas_plink import read_plink
-import pickle
+import h5py
+import herit
+
+
+
 
 def kinship(M):
     mafs = np.sum(M,axis=0)/M.shape[0]
@@ -113,14 +114,14 @@ def mac_filter(mac_min, X, markers):
 
 
 ## calculate betas and se of betas 
-def stderr(a,M,Y_t2d,int_t):
+def std_err(a,M,Y_t2d,int_t):
     n = len(int_t)
     x = tf.stack((int_t,tf.squeeze(tf.matmul(M.T,tf.reshape(a,(n,-1))))),axis=1)
     coeff = tf.matmul(tf.matmul(tf.linalg.inv(tf.matmul(tf.transpose(x),x)),tf.transpose(x)),Y_t2d)
     SSE = tf.reduce_sum(tf.math.square(tf.math.subtract(Y_t2d,tf.math.add(tf.math.multiply(x[:,1],coeff[0,0]),tf.math.multiply(x[:,1],coeff[1,0])))))
     SE = tf.math.sqrt(SSE/(471-(1+2)))
-    StdERR = tf.sqrt(tf.linalg.diag_part(tf.math.multiply(SE , tf.linalg.inv(tf.matmul(tf.transpose(x),x)))))[1]
-    return tf.stack((coeff[1,0],StdERR))
+    std_err = tf.sqrt(tf.linalg.diag_part(tf.math.multiply(SE , tf.linalg.inv(tf.matmul(tf.transpose(x),x)))))[1]
+    return tf.stack((coeff[1,0],std_err))
 
 ## calculate residual sum squares 
 def rss(a,M,Y_t2d,int_t):
@@ -160,11 +161,11 @@ def emmax(int_t,Y_t):
 def transform_cof(M,cof):
     return np.sum(np.multiply(np.transpose(M),cof),axis=1).astype(np.float32)
 
-def  getOutput(F_1,X_sub,StdERR):
-    return tf.concat([tf.reshape(F_1,(X_sub.shape[1],-1)),StdERR],axis=1)
+def  getOutput(F_1,x_sub,std_err):
+    return tf.concat([tf.reshape(F_1,(x_sub.shape[1],-1)),std_err],axis=1)
 
-def getSTDERR(M,Y_t2d,int_t,X_sub):
-    return tf.map_fn(lambda a : stderr(a,M,Y_t2d,int_t), X_sub.T)
+def getstd_err(M,Y_t2d,int_t,x_sub):
+    return tf.map_fn(lambda a : std_err(a,M,Y_t2d,int_t), x_sub.T)
 
 def getF1(RSS_env,R1_full,n):
     return tf.divide(tf.subtract(RSS_env, R1_full),tf.divide(R1_full,(n-3)))
@@ -172,8 +173,8 @@ def getF1(RSS_env,R1_full,n):
 def getPval(F_dist,n):
     return 1 - f.cdf(F_dist,1,n-3)
 
-def getR1Full(M,Y_t2d,int_t,X_sub):
-     return tf.map_fn(lambda a: rss(a,M,Y_t2d,int_t), X_sub.T)
+def getR1Full(M,Y_t2d,int_t,x_sub):
+     return tf.map_fn(lambda a: rss(a,M,Y_t2d,int_t), x_sub.T)
 
 def gwas(X,K,Y,batch_size,cof):
     with open("test_data/cof_test",'wb') as f: pickle.dump(cof, f)
@@ -199,15 +200,15 @@ def gwas(X,K,Y,batch_size,cof):
     for i in range(int(np.ceil(n_marker/batch_size))):
         tf.compat.v1.reset_default_graph()
         if n_marker < batch_size:
-            X_sub = X
+            x_sub = X
         else:
             lower_limit = batch_size * i 
             upper_limit = batch_size * i + batch_size
             if upper_limit <= n_marker :
-                X_sub = X[:,lower_limit:upper_limit]
+                x_sub = X[:,lower_limit:upper_limit]
                 print("Working on markers ", lower_limit , " to ", upper_limit, " of ", n_marker )    
             else:
-                X_sub = X[:,lower_limit:]
+                x_sub = X[:,lower_limit:]
                 print("Working on markers ", lower_limit , " to ", n_marker, " of ", n_marker )    
         config = tf.compat.v1.ConfigProto()
         n_cores = mlt.cpu_count()
@@ -216,16 +217,16 @@ def gwas(X,K,Y,batch_size,cof):
         sess = tf.compat.v1.Session(config=config)                                             
         Y_t2d = tf.cast(tf.reshape(Y_t,(n,-1)),dtype=tf.float32)                     
       #  y_tensor =  tf.convert_to_tensor(Y_t,dtype = tf.float32)                                      
-        StdERR = getSTDERR(M,Y_t2d,int_t,X_sub)              
+        std_err = getstd_err(M,Y_t2d,int_t,x_sub)              
         if isinstance(cof,int) == False :
-            R1_full = tf.map_fn(lambda a: rss_cof(a,M,Y_t2d,int_t,cof_t), X_sub.T)
+            R1_full = tf.map_fn(lambda a: rss_cof(a,M,Y_t2d,int_t,cof_t), x_sub.T)
         else:
-            R1_full = getR1Full(M,Y_t2d,int_t,X_sub)
+            R1_full = getR1Full(M,Y_t2d,int_t,x_sub)
         F_1 = getF1(RSS_env,R1_full,n)
         if i == 0 :
-            output = sess.run(getOutput(F_1,X_sub,StdERR))
+            output = sess.run(getOutput(F_1,x_sub,std_err))
         else :
-            tmp = sess.run(getOutput(F_1,X_sub,StdERR))
+            tmp = sess.run(getOutput(F_1,x_sub,std_err))
             output = np.append(output,tmp,axis=0)
         sess.close()
         F_dist = output[:,0]
