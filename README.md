@@ -169,3 +169,14 @@ The computational time growths exponentially with increasing number of phenotype
 With lower numbers of phenotypes (< 800), the CPU version is faster than the GPU Version.
 This gets more and more lopsided the more phenotypes are included. 
 All calculations have been performed on 16 i9 vCPUS and a NVIDIA Tesla P100 graphic card.
+
+
+## Unit tests 
+
+The unit tests can be run one the console with:
+
+```shell 
+python -m unittest test.py
+```
+
+All the necassary test data is stored in test_data
