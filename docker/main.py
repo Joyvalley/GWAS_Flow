@@ -193,5 +193,6 @@ def gwas(X,K,Y,batch_size,cof):
         F_dist = output[:,0]
     pval  = 1 - f.cdf(F_dist,1,n-3)
     output[:,0] = pval
+ #   with open('test_data/cof_output','wb') as f: pickle.dump(output, f)
     return output 
 

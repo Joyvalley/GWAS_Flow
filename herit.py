@@ -33,4 +33,5 @@ def estimate(y, lik, K, M=None, verbose=True):
         if lik_name == "bernoulli":
             e += pi * pi / 3
         v = var(method.mean())
-        return g , v , e
+        return g, v, e
+
