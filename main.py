@@ -68,14 +68,15 @@ def load_and_prepare_data(x_file, y_file, k_file, m_phe, cof_file):
         cof = np.array(cof['cof'])
         acc_isec = [isec for isec in idc if isec in acc_y]
         #idc_acc = list(map(lambda x: x in acc_isec, idc))
+        if not all(idx_acc):
+            print('''
+            accessions ids in the covariate file must be 
+            identical to the ones in the phenotype file
+            ''')
+            sys.exit()
     else:
         cof = 0
-    if not all(idx_acc):
-        print('''
-        accessions ids in the covariate file must be 
-        identical to the ones in the phenotype file
-        ''')
-        sys.exit()
+
     y_phe_ = np.asarray(y_phe.drop('accession_id', 1), dtype=np.float32)[idy_acc, :]
     if type_x in ('hdf5', 'h5py'):
         x_gen = np.asarray(snp['snps'][0:(len(snp['snps']) + 1), ],
