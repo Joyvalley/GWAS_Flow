@@ -3,43 +3,42 @@ import sys
 import time
 import numpy as np
 import pandas as pd
-import main
 import h5py
+import main
 
 # set defaults
-mac_min = 75
-batch_size = 500000
-out_file = "results.csv"
+BATCH_SIZE = 500000
+OUT_FILE = "results.csv"
 m = 'phenotype_value'
-perm = 1
-mac_min = 1
-cof_file = 0
-cof = "nan"
-plot = False
-K_file = 'not_prov'
+PERM = 1
+MAC_MIN = 1
+COF_FILE = 0
+COF = "nan"
+PLOT = False
+K_FILE = 'not_prov'
 
 
 for i in range(1, len(sys.argv), 2):
     if sys.argv[i] == "-x" or sys.argv[i] == "--genotype":
-        X_file = sys.argv[i + 1]
+        X_FILE = sys.argv[i + 1]
     elif sys.argv[i] == "--cof":
-        cof_file = sys.argv[i + 1]
+        COF_FILE = sys.argv[i + 1]
     elif sys.argv[i] == "-y" or sys.argv[i] == "--phenotype":
-        Y_file = sys.argv[i + 1]
+        Y_FILE = sys.argv[i + 1]
     elif sys.argv[i] == "-k" or sys.argv[i] == "--kinship":
-        K_file = sys.argv[i + 1]
+        K_FILE = sys.argv[i + 1]
     elif sys.argv[i] == "-m":
         m = sys.argv[i + 1]
     elif sys.argv[i] == "-a" or sys.argv[i] == "--mac_min":
-        mac_min = int(sys.argv[i + 1])
+        MAC_MIN = int(sys.argv[i + 1])
     elif sys.argv[i] == "-bs" or sys.argv[i] == "--batch-size":
-        batch_size = int(sys.argv[i + 1])
+        BATCH_SIZE = int(sys.argv[i + 1])
     elif sys.argv[i] == "-p" or sys.argv[i] == "--perm":
-        perm = int(sys.argv[i + 1])
+        PERM = int(sys.argv[i + 1])
     elif sys.argv[i] == "-o" or sys.argv[i] == "--out":
-        out_file = sys.argv[i + 1]
+        OUT_FILE = sys.argv[i + 1]
     elif sys.argv[i] == "--plot":
-        plot = bool(sys.argv[i + 1])
+        PLOT = bool(sys.argv[i + 1])
     elif sys.argv[i] == "-h" or sys.argv[i] == "--help":
         print("-x , --genotype :file containing marker information in csv or hdf5 format of size")
         print("-y , --phenotype: file container phenotype information in csv format")
@@ -61,26 +60,26 @@ print("parsed commandline arguments")
 
 start = time.time()
 
-X, K, Y_, markers, cof = main.load_and_prepare_data(
-    X_file, Y_file, K_file, m, cof_file)
+X, K, Y_, markers, COF = main.load_and_prepare_data(
+    X_FILE, Y_FILE, K_FILE, m, COF_FILE)
 
 
 # MAF filterin
-markers_used, X, macs = main.mac_filter(mac_min, X, markers)
+markers_used, X, macs = main.mac_filter(MAC_MIN, X, markers)
 
 # prepare
-print("Begin performing GWAS on ", Y_file)
+print("Begin performing GWAS on ", Y_FILE)
 
-output = main.gwas(X, K, Y_, batch_size, cof)
-if(X_file.split(".")[-1] == 'csv'):
+output = main.gwas(X, K, Y_, BATCH_SIZE, COF)
+if(X_FILE.split(".")[-1] == 'csv'):
     chr_pos = np.array(list(map(lambda x: x.split("- "), markers_used)))
-elif X_file.split(".")[-1].lower() == 'plink':
+elif X_FILE.split(".")[-1].lower() == 'plink':
     my_chr = [i.split("r")[1] for i in [i.split("_")[0] for i in markers_used]]
     my_pos = [i.split("_")[1] for i in markers_used]
     chr_pos = np.vstack((my_chr, my_pos)).T
 else:
-    chr_reg = h5py.File(X_file, 'r')['positions'].attrs['chr_regions']
-    mk_index = np.array(range(len(markers)), dtype=int)[macs >= mac_min]
+    chr_reg = h5py.FILE(X_FILE, 'r')['positions'].attrs['chr_regions']
+    mk_index = np.array(range(len(markers)), dtype=int)[macs >= MAC_MIN]
     chr_pos = np.array(
         [list(map(lambda x: sum(x > chr_reg[:, 1]) + 1, mk_index)), markers_used]).T
     my_time = np.repeat((time.time() - start), len(chr_pos))
@@ -88,23 +87,23 @@ res = pd.DataFrame({
     'chr': chr_pos[:, 0],
     'pos': chr_pos[:, 1],
     'pval': output[:, 0],
-    'mac': np.array(macs[macs >= mac_min], dtype=np.int),
+    'mac': np.array(macs[macs >= MAC_MIN], dtype=np.int),
     'eff_size': output[:, 1],
     'SE': output[:, 2]})
-res.to_csv(out_file, index=False)
-if perm > 1:
+res.to_csv(OUT_FILE, index=False)
+if PERM > 1:
     min_pval = []
     perm_seeds = []
     my_time = []
-    for i in range(perm):
-        perm_out = 'perm_' + out_file
+    for i in range(PERM):
+        perm_out = 'perm_' + OUT_FILE
         start_perm = time.time()
-        print("Running permutation ", i + 1, " of ", perm)
+        print("Running permutation ", i + 1, " of ", PERM)
         my_seed = np.asscalar(np.random.randint(9999, size=1))
         perm_seeds.append(my_seed)
         np.random.seed(my_seed)
         Y_perm = np.random.permutation(Y_)
-        output = main.gwas(X, K, Y_perm, batch_size, cof)
+        output = main.gwas(X, K, Y_perm, BATCH_SIZE, COF)
         min_pval.append(np.min(output[:, 0]))
         print(
             "Elapsed time for permuatation",
@@ -126,9 +125,9 @@ if perm > 1:
     res_perm.to_csv(perm_out, index=False)
 
 
-if plot:
+if PLOT:
     import plot
-    plot.manhattan(out_file, perm)
+    plot.manhattan(OUT_FILE, PERM)
 
 
 print("Finished performing GWAS")

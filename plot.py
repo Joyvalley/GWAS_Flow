@@ -15,7 +15,9 @@ def manhattan(res_name, perm):
             res['chr'].dtype,
             np.number) != True:
         raise ValueError(
-            'The manhattan plot requires numeric information for the chromosomes and position of the markers')
+            '''The manhattan plot requires numeric
+            information for the chromosomes and position of the markers
+            ''')
     max_chr = np.max(res.chr)
     res.chr = res.chr.astype('category')
     res['my_cumsum'] = list(range(1, len(res) + 1))
