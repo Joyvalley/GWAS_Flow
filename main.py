@@ -20,8 +20,8 @@ def kinship(M):
 
 
 def load_and_prepare_data(x_file, y_file, k_file, m, cof_file):
-    if K_file != 'not_prov':
-        type_K = K_file.split(".")[-1]
+    if k_file != 'not_prov':
+        type_K = k_file.split(".")[-1]
     type_X = x_file.split(".")[-1]
     Y = pd.read_csv(y_file, engine='python').sort_values(
         ['accession_id']).groupby('accession_id').mean()
