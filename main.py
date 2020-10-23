@@ -118,12 +118,12 @@ def mac_filter(mac_min, x_gen, markers):
 # calculate betas and se of betas
 
 def stderr(a, marker, y_t2d, int_t):
-    n = len(int_t)
+    n_phe= len(int_t)
     x = tf.stack(
         (int_t, tf.squeeze(
             tf.matmul(
                 marker.T, tf.reshape(
-                    a, (n, -1))))), axis=1)
+                    a, (n_phe, -1))))), axis=1)
     coeff = tf.matmul(
         tf.matmul(
             tf.linalg.inv(
@@ -173,23 +173,25 @@ def rss_cof(a, marker, y_t2d, int_t, cof_t):
 
 
 def get_k_stand(kin_vr):
-    n = kin_vr.shape[0]
-    return (n - 1) / np.sum((np.identity(n) - np.ones((n, n)) / n) * kin_vr) * kin_vr
+    n_phe= kin_vr.shape[0]
+    return (n_phe- 1) / np.sum((np.identity(n_phe) -
+                                np.ones((n_phe, n_phe)) / n_phe)
+                               * kin_vr) * kin_vr
 
 
 def get_herit(y_phe, k_stand):
     return herit.estimate(y_phe, "normal", k_stand, verbose=False)
 
 
-def transform_kinship(vg, k_stand, ve):
-    n = k_stand.shape[0]
+def transform_kinship(v_g, k_stand, v_e):
+    n_phe= k_stand.shape[0]
     return np.transpose(
         np.linalg.inv(
             np.linalg.cholesky(
-                vg *
+                v_g *
                 k_stand +
-                ve *
-                np.identity(n)))).astype(
+                v_e *
+                np.identity(n_phe)))).astype(
         np.float32)
 
 
@@ -198,19 +200,19 @@ def transform_y(marker, y_phe):
 
 
 def transform_int(marker):
-    n = marker.shape[0]
+    n_phe= marker.shape[0]
     return np.sum(
         np.multiply(
             np.transpose(marker),
-            np.ones(n)),
+            np.ones(n_phe)),
         axis=1).astype(
             np.float32)
 
 
 def emmax(int_t, y_trans):
-    n = len(int_t)
-    return (np.linalg.lstsq(np.reshape(int_t, (n, -1)),
-                            np.reshape(y_trans, (n, -1)), rcond=None)[1]).astype(np.float32)
+    n_phe= len(int_t)
+    return (np.linalg.lstsq(np.reshape(int_t, (n_phe, -1)),
+                            np.reshape(y_trans, (n_phe, -1)), rcond=None)[1]).astype(np.float32)
 
 
 def transform_cof(marker, cof):
@@ -226,14 +228,14 @@ def get_stderr(marker, y_t2d, int_t, x_sub):
     return tf.map_fn(lambda a: stderr(a, marker, y_t2d, int_t), x_sub.T)
 
 
-def get_f1(rss_env, r1_full, n):
+def get_f1(rss_env, r1_full, n_phe):
     return tf.divide(
         tf.subtract(
             rss_env, r1_full), tf.divide(
-            r1_full, (n - 3)))
+            r1_full, (n_phe - 3)))
 
-def get_pval(f_dist, n):
-    return 1 - f.cdf(f_dist, 1, n - 3)
+def get_pval(f_dist, n_phe):
+    return 1 - f.cdf(f_dist, 1, n_phe - 3)
 
 
 def get_r1_full(marker, y_t2d, int_t, x_sub):
@@ -245,15 +247,15 @@ def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
 #        pickle.dump(cof, f)
     y_phe = y_phe.flatten()
     n_marker = x_gen.shape[1]
-    n = len(y_phe)
+    n_phe= len(y_phe)
     # REML
     k_stand = get_k_stand(kin_vr)
-    vg, delta, ve = get_herit(y_phe, k_stand)
-    print(" Pseudo-heritability is ", vg / (ve + vg + delta))
-    print(" Performing GWAS on ", n, " phenotypes and ", n_marker, "markers")
+    v_g, delta, v_e = get_herit(y_phe, k_stand)
+    print(" Pseudo-heritability is ", v_g / (v_e + v_g + delta))
+    print(" Performing GWAS on ", n_phe, " phenotypes and ", n_marker, "markers")
     # Transform kinship-matrix, phenotypes and estimate intercpt
    #  Xo = np.ones(K.shape[0]).flatten()
-    marker = transform_kinship(vg, k_stand, ve)
+    marker = transform_kinship(v_g, k_stand, v_e)
     y_trans = transform_y(marker, y_phe)
     int_t = transform_int(marker)
     # transform  co-factor
@@ -289,7 +291,7 @@ def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
                     n_marker)
         config = tf.compat.v1.ConfigProto()
         sess = tf.compat.v1.Session(config=config)
-        y_t2d = tf.cast(tf.reshape(y_trans, (n, -1)), dtype=tf.float32)
+        y_t2d = tf.cast(tf.reshape(y_trans, (n_phe, -1)), dtype=tf.float32)
       #  y_tensor =  tf.convert_to_tensor(y_trans,dtype = tf.float32)
         StdERR = get_stderr(marker, y_t2d, int_t, x_sub)
         if isinstance(cof, int) == False:
@@ -298,7 +300,7 @@ def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
                     a, marker, y_t2d, int_t, cof_t), x_sub.T)
         else:
             r1_full = get_r1_full(marker, y_t2d, int_t, x_sub)
-        f_1 = get_f1(rss_env, r1_full, n)
+        f_1 = get_f1(rss_env, r1_full, n_phe)
         if i == 0:
             output = sess.run(get_output(f_1, x_sub, StdERR))
         else:
@@ -306,7 +308,7 @@ def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
             output = np.append(output, tmp, axis=0)
         sess.close()
         f_dist = output[:, 0]
-    pval = get_pval(f_dist, n)
+    pval = get_pval(f_dist, n_phe)
     output[:, 0] = pval
  #   with open("test_data/cof_output", 'wb') as f: pickle.dump(output, f)
     return output
