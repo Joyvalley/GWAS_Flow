@@ -19,35 +19,35 @@ def kinship(M):
     return K
 
 
-def load_and_prepare_data(X_file, Y_file, K_file, m, cof_file):
+def load_and_prepare_data(x_file, y_file, k_file, m, cof_file):
     if K_file != 'not_prov':
         type_K = K_file.split(".")[-1]
-    type_X = X_file.split(".")[-1]
-    Y = pd.read_csv(Y_file, engine='python').sort_values(
+    type_X = x_file.split(".")[-1]
+    Y = pd.read_csv(y_file, engine='python').sort_values(
         ['accession_id']).groupby('accession_id').mean()
     Y = pd.DataFrame({'accession_id': Y.index, 'phenotype_value': Y[m]})
     if type_X == 'hdf5' or type_X == 'h5py':
-        SNP = h5py.File(X_file, 'r')
+        SNP = h5py.File(x_file, 'r')
         markers = np.asarray(SNP['positions'])
         acc_X = np.asarray(SNP['accessions'][:], dtype=np.int)
     elif type_X == 'csv':
-        X = pd.read_csv(X_file, index_col=0)
+        X = pd.read_csv(x_file, index_col=0)
         markers = X.columns.values
         acc_X = X.index
         X = np.asarray(X, dtype=np.float32) / 2
     elif type_X.lower() == 'plink':
-        my_prefix = X_file.split(".")[0]
+        my_prefix = x_file.split(".")[0]
         (bim, fam, bed) = read_plink(my_prefix)
         acc_X = np.array(fam[['fid']], dtype=np.int).flatten()
         markers = np.array(bim[['snp']]).flatten()
     else:
         sys.exit("Only hdf5, h5py, plink and csv files are supported")
-    if K_file != 'not_prov':
+    if k_file != 'not_prov':
         if type_K == 'hdf5' or type_K == 'h5py':
-            k = h5py.File(K_file, 'r')
+            k = h5py.File(k_file, 'r')
             acc_K = np.asarray(k['accessions'][:], dtype=np.int)
         elif type_K == 'csv':
-            k = pd.read_csv(K_file, index_col=0)
+            k = pd.read_csv(k_file, index_col=0)
             acc_K = k.index
             k = np.array(k, dtype=np.float32)
 
@@ -56,7 +56,7 @@ def load_and_prepare_data(X_file, Y_file, K_file, m, cof_file):
 
     idx_acc = list(map(lambda x: x in acc_isec, acc_X))
     idy_acc = list(map(lambda x: x in acc_isec, acc_Y))
-    if K_file != 'not_prov':
+    if k_file != 'not_prov':
         idk_acc = list(map(lambda x: x in acc_isec, acc_K))
     else:
         cof = 0
@@ -67,15 +67,17 @@ def load_and_prepare_data(X_file, Y_file, K_file, m, cof_file):
         acc_isec = [isec for isec in idc if isec in acc_Y]
         idc_acc = list(map(lambda x: x in acc_isec, idc))
         if not all(idx_acc):
-            print(
-                "accessions ids in the covariate file must be identical to the ones in the phenotype file")
+            print('''
+                accessions ids in the covariate file must be 
+                identical to the ones in the phenotype file
+            ''')
             quit()
     Y_ = np.asarray(Y.drop('accession_id', 1), dtype=np.float32)[idy_acc, :]
     if type_X == 'hdf5' or type_X == 'h5py':
         X = np.asarray(SNP['snps'][0:(len(SNP['snps']) + 1), ],
                        dtype=np.float32)[:, idx_acc].T
         X = X[np.argsort(acc_X[idx_acc]), :]
-        if K_file != 'not_prov':
+        if k_file != 'not_prov':
             k1 = np.asarray(k['kinship'][:])[idk_acc, :]
             K = k1[:, idk_acc]
             K = K[np.argsort(acc_X[idx_acc]), :]
@@ -84,7 +86,7 @@ def load_and_prepare_data(X_file, Y_file, K_file, m, cof_file):
             K = kinship(X)
     elif type_X.lower() == 'plink':
         X = np.asarray(bed.compute() / 2, dtype=np.float32)[:, idx_acc].T
-        if K_file != 'not_prov':
+        if k_file != 'not_prov':
             k1 = np.asarray(k['kinship'][:])[idk_acc, :]
             K = k1[:, idk_acc]
             K = K[np.argsort(acc_X[idx_acc]), :]
@@ -93,7 +95,7 @@ def load_and_prepare_data(X_file, Y_file, K_file, m, cof_file):
             K = kinship(X)
     else:
         X = X[idx_acc, :]
-        if K_file != 'not_prov':
+        if k_file != 'not_prov':
             k1 = k[idk_acc, :]
             K = k1[:, idk_acc]
         else:
