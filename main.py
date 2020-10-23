@@ -7,11 +7,12 @@ from pandas_plink import read_plink
 import h5py
 import herit
 # import pickle
-
+""" main functions to perform gwas called in main.py """
 
 
 
 def kinship(marker):
+    ''' returns kinship matrix after vanRaden '''
     n_phe = marker.shape[0]
     n_mar = marker.shape[1]
     mafs = np.sum(marker, axis=0) / n_phe
@@ -22,6 +23,7 @@ def kinship(marker):
 
 
 def load_and_prepare_data(x_file, y_file, k_file, m, cof_file):
+    ''' etl the data '''
     if k_file != 'not_prov':
         type_k = k_file.split(".")[-1]
     type_x = x_file.split(".")[-1]
@@ -45,7 +47,7 @@ def load_and_prepare_data(x_file, y_file, k_file, m, cof_file):
     else:
         sys.exit("Only hdf5, h5py, plink and csv files are supported")
     if k_file != 'not_prov':
-        if type_k == 'hdf5' or type_k == 'h5py':
+        if type_k in ('hdf5', 'h5py'):
             k = h5py.File(k_file, 'r')
             acc_k = np.asarray(k['accessions'][:], dtype=np.int)
         elif type_k == 'csv':
@@ -73,9 +75,9 @@ def load_and_prepare_data(x_file, y_file, k_file, m, cof_file):
                 accessions ids in the covariate file must be 
                 identical to the ones in the phenotype file
             ''')
-            quit()
+            sys.exit()
     y_phe_ = np.asarray(y_phe.drop('accession_id', 1), dtype=np.float32)[idy_acc, :]
-    if type_x == 'hdf5' or type_x == 'h5py':
+    if type_x in ('hdf5', 'h5py'):
         x_gen = np.asarray(snp['snps'][0:(len(snp['snps']) + 1), ],
                        dtype=np.float32)[:, idx_acc].T
         x_gen = x_gen[np.argsort(acc_x[idx_acc]), :]
@@ -90,7 +92,7 @@ def load_and_prepare_data(x_file, y_file, k_file, m, cof_file):
         x_gen = np.asarray(bed.compute() / 2, dtype=np.float32)[:, idx_acc].T
         if k_file != 'not_prov':
             k_1 = np.asarray(k['kinship'][:])[idk_acc, :]
-            kin_vr = k1[:, idk_acc]
+            kin_vr = k_1[:, idk_acc]
             kin_vr = kin_vr[np.argsort(acc_x[idx_acc]), :]
             kin_vr = kin_vr[:, np.argsort(acc_x[idx_acc])]
         else:
@@ -108,6 +110,7 @@ def load_and_prepare_data(x_file, y_file, k_file, m, cof_file):
 
 
 def mac_filter(mac_min, x_gen, markers):
+    ''' filter for minor allele frequencies'''
     ac1 = np.sum(x_gen, axis=0)
     ac0 = x_gen.shape[0] - ac1
     macs = np.minimum(ac1, ac0)
@@ -117,13 +120,14 @@ def mac_filter(mac_min, x_gen, markers):
 
 # calculate betas and se of betas
 
-def stderr_func(a, marker, y_t2d, int_t):
+def stderr_func(itt, marker, y_t2d, int_t):
+    '''returns standard errors for induvidual markers '''
     n_phe= len(int_t)
     x = tf.stack(
         (int_t, tf.squeeze(
             tf.matmul(
                 marker.T, tf.reshape(
-                    a, (n_phe, -1))))), axis=1)
+                    itt, (n_phe, -1))))), axis=1)
     coeff = tf.matmul(
         tf.matmul(
             tf.linalg.inv(
@@ -148,8 +152,9 @@ def stderr_func(a, marker, y_t2d, int_t):
 # calculate residual sum squares
 
 
-def rss(a, marker, y_t2d, int_t):
-    x_t = tf.reduce_sum(tf.math.multiply(marker.T, a), axis=1)
+def rss(itt, marker, y_t2d, int_t):
+    ''' calculates the residual sum of squares '''
+    x_t = tf.reduce_sum(tf.math.multiply(marker.T, itt), axis=1)
     lm_res = tf.linalg.lstsq(
         tf.transpose(
             tf.stack(
@@ -161,8 +166,9 @@ def rss(a, marker, y_t2d, int_t):
 # calculate residual sum squares with co-variates
 
 
-def rss_cof(a, marker, y_t2d, int_t, cof_t):
-    x_t = tf.reduce_sum(tf.math.multiply(marker.T, a), axis=1)
+def rss_cof(itt, marker, y_t2d, int_t, cof_t):
+    ''' calculates the residual sum of squares when cof is included '''
+    x_t = tf.reduce_sum(tf.math.multiply(marker.T, itt), axis=1)
     lm_res = tf.linalg.lstsq(
         tf.transpose(
             tf.stack(
@@ -173,6 +179,7 @@ def rss_cof(a, marker, y_t2d, int_t, cof_t):
 
 
 def get_k_stand(kin_vr):
+    ''' obtains the standardized kinship matrix'''
     n_phe= kin_vr.shape[0]
     return (n_phe- 1) / np.sum((np.identity(n_phe) -
                                 np.ones((n_phe, n_phe)) / n_phe)
@@ -180,10 +187,12 @@ def get_k_stand(kin_vr):
 
 
 def get_herit(y_phe, k_stand):
+    ''' calculates the heritabilty'''
     return herit.estimate(y_phe, "normal", k_stand, verbose=False)
 
 
 def transform_kinship(v_g, k_stand, v_e):
+    ''' transform the kinship matrix with cholesky transformation '''
     n_phe= k_stand.shape[0]
     return np.transpose(
         np.linalg.inv(
@@ -196,10 +205,12 @@ def transform_kinship(v_g, k_stand, v_e):
 
 
 def transform_y(marker, y_phe):
+    ''' transform phenotypes '''
     return np.sum(np.multiply(np.transpose(marker), y_phe), axis=1).astype(np.float32)
 
 
 def transform_int(marker):
+    ''' transform the intercept'''
     n_phe= marker.shape[0]
     return np.sum(
         np.multiply(
@@ -210,39 +221,47 @@ def transform_int(marker):
 
 
 def emmax(int_t, y_trans):
+    ''' run emmax according to Kang et al 2010'''
     n_phe= len(int_t)
     return (np.linalg.lstsq(np.reshape(int_t, (n_phe, -1)),
                             np.reshape(y_trans, (n_phe, -1)), rcond=None)[1]).astype(np.float32)
 
 
 def transform_cof(marker, cof):
+    ''' transform the coefficients '''
     return np.sum(np.multiply(np.transpose(marker), cof), axis=1).astype(np.float32)
 
 
 
 def get_output(f_1, x_sub, stdr_glob):
+    ''' get the F1 values''' 
     return tf.concat([tf.reshape(f_1, (x_sub.shape[1], -1)), stdr_glob], axis=1)
 
 
 def get_stderr(marker, y_t2d, int_t, x_sub):
+    ''' build tensor loping of all markers to obtain all standerros''' 
     return tf.map_fn(lambda mar: stderr_func(mar, marker, y_t2d, int_t), x_sub.T)
 
 
 def get_f1(rss_env, r1_full, n_phe):
+    '''calculate the f1 scors for all markers'''
     return tf.divide(
         tf.subtract(
             rss_env, r1_full), tf.divide(
             r1_full, (n_phe - 3)))
 
 def get_pval(f_dist, n_phe):
+    '''get p values from f1 scores'''
     return 1 - f.cdf(f_dist, 1, n_phe - 3)
 
 
 def get_r1_full(marker, y_t2d, int_t, x_sub):
+    ''' build tensor for full model '''
     return tf.map_fn(lambda mar: rss(mar, marker, y_t2d, int_t), x_sub.T)
 
 
 def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
+    ''' get gwas results, calls all the subfunctions '''
 #    with open("test_data/cof_test", 'wb') as f:
 #        pickle.dump(cof, f)
     y_phe = y_phe.flatten()

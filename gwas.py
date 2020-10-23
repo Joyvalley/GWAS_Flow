@@ -1,10 +1,11 @@
-import os
 import sys
 import time
 import numpy as np
 import pandas as pd
 import h5py
 import main
+''' main script for gwas '''
+
 
 # set defaults
 BATCH_SIZE = 500000
@@ -44,9 +45,18 @@ for i in range(1, len(sys.argv), 2):
         print("-y , --phenotype: file container phenotype information in csv format")
         print("-k , --kinship : file containing kinship matrix of size k X k in csv or hdf5 format")
         print("-m : name of columnn containing the phenotype : default m = phenotype_value")
-        print("-a , --mac_min : integer specifying the minimum minor allele count necessary for a marker to be included. Default a = 1")
-        print("-bs, --batch-size : integer specifying the number of markers processed at once. Default -bs 500000")
-        print("-p , --perm : single integer specifying the number of permutations. Default 1 == no perm ")
+        print('''
+        -a , --mac_min : integer specifying the minimum minor allele count necessary 
+        for a marker to be included. Default a = 1
+        ''')
+        print('''
+        -bs, --batch-size : integer specifying the number of markers processed at once.
+        Default -bs 500000
+        ''')
+        print('''
+        -p , --perm : single integer specifying the number of permutations. 
+        Default 1 == no perm 
+        ''')
         print("-o , --out : name of output file. Default -o results.csv  ")
         print("-h , --help : prints help and command line options")
         print("--plot: creates manhattan plot")
@@ -72,20 +82,20 @@ print("Begin performing GWAS on ", Y_FILE)
 
 output = main.gwas(X, K, Y_, BATCH_SIZE, COF)
 if(X_FILE.split(".")[-1] == 'csv'):
-    chr_pos = np.array(list(map(lambda x: x.split("- "), markers_used)))
+    CHR_POS = np.array(list(map(lambda x: x.split("- "), markers_used)))
 elif X_FILE.split(".")[-1].lower() == 'plink':
     my_chr = [i.split("r")[1] for i in [i.split("_")[0] for i in markers_used]]
     my_pos = [i.split("_")[1] for i in markers_used]
-    chr_pos = np.vstack((my_chr, my_pos)).T
+    CHR_POS = np.vstack((my_chr, my_pos)).T
 else:
     chr_reg = h5py.FILE(X_FILE, 'r')['positions'].attrs['chr_regions']
     mk_index = np.array(range(len(markers)), dtype=int)[macs >= MAC_MIN]
-    chr_pos = np.array(
+    CHR_POS = np.array(
         [list(map(lambda x: sum(x > chr_reg[:, 1]) + 1, mk_index)), markers_used]).T
-    my_time = np.repeat((time.time() - start), len(chr_pos))
+    my_time = np.repeat((time.time() - start), len(CHR_POS))
 res = pd.DataFrame({
-    'chr': chr_pos[:, 0],
-    'pos': chr_pos[:, 1],
+    'chr': CHR_POS[:, 0],
+    'pos': CHR_POS[:, 1],
     'pval': output[:, 0],
     'mac': np.array(macs[macs >= MAC_MIN], dtype=np.int),
     'eff_size': output[:, 1],
@@ -107,13 +117,8 @@ if PERM > 1:
         min_pval.append(np.min(output[:, 0]))
         print(
             "Elapsed time for permuatation",
-            i +
-            1,
-            " with p_min",
-            min_pval[i],
-            " is",
-            ": ",
-            round(
+            i + 1, " with p_min", min_pval[i],
+            " is",": ", round(
                 time.time() -
                 start_perm,
                 2))

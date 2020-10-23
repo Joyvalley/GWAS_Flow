@@ -5,11 +5,11 @@ from glimix_core.lmm import LMM
 from limix._data import normalize_likelihood, conform_dataset
 from limix.qtl._assert import assert_finite
 from limix._display import session_block, session_line
-""" custom function from limix package that calculates the variance components estiamtes """
+''' custom function from limix package that calculates the variance components estiamtes '''
 
 
 def estimate(y_phe, lik, kin, marker_mat=None, verbose=True):
-    """ estimate variance components """
+    ''' estimate variance components '''
     lik = normalize_likelihood(lik)
     lik_name = lik[0]
     with session_block("Heritability analysis", disable=not verbose):
