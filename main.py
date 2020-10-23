@@ -59,7 +59,7 @@ def load_and_prepare_data(X_file, Y_file, K_file, m, cof_file):
     if K_file != 'not_prov':
         idk_acc = list(map(lambda x: x in acc_isec, acc_K))
     else:
-    cof = 0
+        cof = 0
     if cof_file != 0:
         cof = pd.read_csv(cof_file, index_col=0)
         idc = cof.index
