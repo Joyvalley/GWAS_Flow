@@ -1,3 +1,4 @@
+''' custom function from limix package that calculates the variance components estiamtes '''
 from numpy_sugar.linalg import economic_qs
 from numpy import pi, var
 from glimix_core.glmm import GLMMExpFam
@@ -5,7 +6,6 @@ from glimix_core.lmm import LMM
 from limix._data import normalize_likelihood, conform_dataset
 from limix.qtl._assert import assert_finite
 from limix._display import session_block, session_line
-''' custom function from limix package that calculates the variance components estiamtes '''
 
 
 def estimate(y_phe, lik, kin, marker_mat=None, verbose=True):

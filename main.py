@@ -1,3 +1,4 @@
+'''  main functions to perform gwas called in main.py '''
 import sys
 import pandas as pd
 import numpy as np
@@ -7,7 +8,6 @@ from pandas_plink import read_plink
 import h5py
 import herit
 # import pickle
-""" main functions to perform gwas called in main.py """
 
 
 
@@ -22,14 +22,14 @@ def kinship(marker):
     return kin_vr
 
 
-def load_and_prepare_data(x_file, y_file, k_file, m, cof_file):
+def load_and_prepare_data(x_file, y_file, k_file, m_phe, cof_file):
     ''' etl the data '''
     if k_file != 'not_prov':
         type_k = k_file.split(".")[-1]
     type_x = x_file.split(".")[-1]
     y_phe = pd.read_csv(y_file, engine='python').sort_values(
         ['accession_id']).groupby('accession_id').mean()
-    y_phe = pd.DataFrame({'accession_id': y_phe.index, 'phenotype_value': y_phe[m]})
+    y_phe = pd.DataFrame({'accession_id': y_phe.index, 'phenotype_value': y_phe[m_phe]})
     if type_x in ('hdf5',  'h5py'):
         snp = h5py.File(x_file, 'r')
         markers = np.asarray(snp['positions'])
@@ -58,24 +58,24 @@ def load_and_prepare_data(x_file, y_file, k_file, m, cof_file):
     acc_y = np.asarray(y_phe[['accession_id']]).flatten()
     acc_isec = [isec for isec in acc_x if isec in acc_y]
 
-    idx_acc = list(map(lambda x: x in acc_isec, acc_x))
-    idy_acc = list(map(lambda x: x in acc_isec, acc_y))
+    idx_acc = list(map(lambda itt: itt in acc_isec, acc_x))
+    idy_acc = list(map(lambda itt: itt in acc_isec, acc_y))
     if k_file != 'not_prov':
-        idk_acc = list(map(lambda x: x in acc_isec, acc_k))
-    else:
-        cof = 0
+        idk_acc = list(map(lambda itt: itt in acc_isec, acc_k))
     if cof_file != 0:
         cof = pd.read_csv(cof_file, index_col=0)
         idc = cof.index
         cof = np.array(cof['cof'])
         acc_isec = [isec for isec in idc if isec in acc_y]
         #idc_acc = list(map(lambda x: x in acc_isec, idc))
-        if not all(idx_acc):
-            print('''
-                accessions ids in the covariate file must be 
-                identical to the ones in the phenotype file
-            ''')
-            sys.exit()
+    else:
+        cof = 0
+    if not all(idx_acc):
+        print('''
+        accessions ids in the covariate file must be 
+        identical to the ones in the phenotype file
+        ''')
+        sys.exit()
     y_phe_ = np.asarray(y_phe.drop('accession_id', 1), dtype=np.float32)[idy_acc, :]
     if type_x in ('hdf5', 'h5py'):
         x_gen = np.asarray(snp['snps'][0:(len(snp['snps']) + 1), ],
@@ -234,12 +234,12 @@ def transform_cof(marker, cof):
 
 
 def get_output(f_1, x_sub, stdr_glob):
-    ''' get the F1 values''' 
+    ''' get the F1 values'''
     return tf.concat([tf.reshape(f_1, (x_sub.shape[1], -1)), stdr_glob], axis=1)
 
 
 def get_stderr(marker, y_t2d, int_t, x_sub):
-    ''' build tensor loping of all markers to obtain all standerros''' 
+    ''' build tensor loping of all markers to obtain all standerros'''
     return tf.map_fn(lambda mar: stderr_func(mar, marker, y_t2d, int_t), x_sub.T)
 
 

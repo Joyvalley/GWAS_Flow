@@ -1,8 +1,9 @@
+''' generate manhattan plots '''
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
-''' generate manhattan plots '''
+
 
 # functions to plot a simple manhattanplot which includes the bonferroni
 # threshold and if applicable the permutation-based threshold
@@ -20,7 +21,6 @@ def manhattan(res_name, perm):
             '''The manhattan plot requires numeric
             information for the chromosomes and position of the markers
             ''')
-    max_chr = np.max(res.chr)
     res.chr = res.chr.astype('category')
     res['my_cumsum'] = list(range(1, len(res) + 1))
     res['BPcum'] = 0
@@ -37,6 +37,7 @@ def manhattan(res_name, perm):
     res_group = res.groupby('chr')
     figure(num=None, figsize=(8, 6), dpi=80, facecolor='w', edgecolor='k')
     fig, my_axis = plt.subplots()
+    del fig
     my_axis.margins(0.05)
     my_axis.hlines(
         np.log10(
@@ -45,7 +46,6 @@ def manhattan(res_name, perm):
     if perm > 1:
         perm_res = pd.read_csv('perm_' + res_name)
         perm_idx = round(perm / 20, 0)
-        perm_res['min_p']
         perm_threshold = perm_res['min_p'][perm_idx]
         my_axis.hlines(-np.log10(perm_threshold), xmin=0,
                   xmax=np.max(res['BPcum']), linestyles="dashed")
