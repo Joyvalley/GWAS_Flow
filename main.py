@@ -6,7 +6,7 @@ import tensorflow as tf
 from pandas_plink import read_plink
 import h5py
 import herit
-
+import pickle
 
 
 
@@ -213,12 +213,12 @@ def transform_cof(M, cof):
 
 
 
-def getOutput(F_1, X_sub, StdERR):
-    return tf.concat([tf.reshape(F_1, (X_sub.shape[1], -1)), StdERR], axis=1)
+def getOutput(F_1, x_sub, StdERR):
+    return tf.concat([tf.reshape(F_1, (x_sub.shape[1], -1)), StdERR], axis=1)
 
 
-def getSTDERR(M, Y_t2d, int_t, X_sub):
-    return tf.map_fn(lambda a: stderr(a, M, Y_t2d, int_t), X_sub.T)
+def getSTDERR(M, Y_t2d, int_t, x_sub):
+    return tf.map_fn(lambda a: stderr(a, M, Y_t2d, int_t), x_sub.T)
 
 
 def getF1(RSS_env, R1_full, n):
@@ -231,13 +231,13 @@ def getPval(F_dist, n):
     return 1 - f.cdf(F_dist, 1, n - 3)
 
 
-def getR1Full(M, Y_t2d, int_t, X_sub):
-    return tf.map_fn(lambda a: rss(a, M, Y_t2d, int_t), X_sub.T)
+def getR1Full(M, Y_t2d, int_t, x_sub):
+    return tf.map_fn(lambda a: rss(a, M, Y_t2d, int_t), x_sub.T)
 
 
 def gwas(X, K, Y, batch_size, cof):
-    with open("test_data/cof_test", 'wb') as f:
-        pickle.dump(cof, f)
+#    with open("test_data/cof_test", 'wb') as f:
+#        pickle.dump(cof, f)
     Y = Y.flatten()
     n_marker = X.shape[1]
     n = len(Y)
@@ -265,7 +265,7 @@ def gwas(X, K, Y, batch_size, cof):
             lower_limit = batch_size * i
             upper_limit = batch_size * i + batch_size
             if upper_limit <= n_marker:
-                X_sub = X[:, lower_limit:upper_limit]
+                x_sub = X[:, lower_limit:upper_limit]
                 print(
                     "Working on markers ",
                     lower_limit,
@@ -274,7 +274,7 @@ def gwas(X, K, Y, batch_size, cof):
                     " of ",
                     n_marker)
             else:
-                X_sub = X[:, lower_limit:]
+                x_sub = X[:, lower_limit:]
                 print(
                     "Working on markers ",
                     lower_limit,
@@ -283,29 +283,25 @@ def gwas(X, K, Y, batch_size, cof):
                     " of ",
                     n_marker)
         config = tf.compat.v1.ConfigProto()
-        n_cores = mlt.cpu_count()
-        config.intra_op_parallelism_threads = n_cores
-        config.inter_op_parallelism_threads = n_cores
         sess = tf.compat.v1.Session(config=config)
         Y_t2d = tf.cast(tf.reshape(Y_t, (n, -1)), dtype=tf.float32)
       #  y_tensor =  tf.convert_to_tensor(Y_t,dtype = tf.float32)
-        StdERR = getSTDERR(M, Y_t2d, int_t, X_sub)
+        StdERR = getSTDERR(M, Y_t2d, int_t, x_sub)
         if isinstance(cof, int) == False:
             R1_full = tf.map_fn(
                 lambda a: rss_cof(
-                    a, M, Y_t2d, int_t, cof_t), X_sub.T)
+                    a, M, Y_t2d, int_t, cof_t), x_sub.T)
         else:
-            R1_full = getR1Full(M, Y_t2d, int_t, X_sub)
+            R1_full = getR1Full(M, Y_t2d, int_t, x_sub)
         F_1 = getF1(RSS_env, R1_full, n)
         if i == 0:
-            output = sess.run(getOutput(F_1, X_sub, StdERR))
+            output = sess.run(getOutput(F_1, x_sub, StdERR))
         else:
-            tmp = sess.run(getOutput(F_1, X_sub, StdERR))
+            tmp = sess.run(getOutput(F_1, x_sub, StdERR))
             output = np.append(output, tmp, axis=0)
         sess.close()
         F_dist = output[:, 0]
     pval = getPval(F_dist, n)
     output[:, 0] = pval
-    with open("test_data/cof_output", 'wb') as f:
-        pickle.dump(output, f)
+ #   with open("test_data/cof_output", 'wb') as f: pickle.dump(output, f)
     return output
