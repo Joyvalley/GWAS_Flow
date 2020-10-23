@@ -24,4 +24,4 @@ jobs:
         pip install scipy==1.2.1
     - name: Analysing the code with pylint
       run: |
-        pylint `ls -R|grep .py$|grep -v h5py | xargs`
+        pylint --fail-under=8.0 `ls -R|grep .py$|grep -v h5py | xargs`
