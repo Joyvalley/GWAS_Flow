@@ -29,44 +29,44 @@ def load_and_prepare_data(x_file, y_file, k_file, m, cof_file):
         ['accession_id']).groupby('accession_id').mean()
     y_phe = pd.DataFrame({'accession_id': y_phe.index, 'phenotype_value': y_phe[m]})
     if type_x == 'hdf5' or type_x == 'h5py':
-        SNP = h5py.File(x_file, 'r')
-        markers = np.asarray(SNP['positions'])
-        acc_X = np.asarray(SNP['accessions'][:], dtype=np.int)
+        snp = h5py.File(x_file, 'r')
+        markers = np.asarray(snp['positions'])
+        acc_x = np.asarray(snp['accessions'][:], dtype=np.int)
     elif type_x == 'csv':
-        X = pd.read_csv(x_file, index_col=0)
-        markers = X.columns.values
-        acc_X = X.index
-        X = np.asarray(X, dtype=np.float32) / 2
+        x_gen = pd.read_csv(x_file, index_col=0)
+        markers = x_gen.columns.values
+        acc_x = x_gen.index
+        x_gen = np.asarray(x_gen, dtype=np.float32) / 2
     elif type_x.lower() == 'plink':
         my_prefix = x_file.split(".")[0]
         (bim, fam, bed) = read_plink(my_prefix)
-        acc_X = np.array(fam[['fid']], dtype=np.int).flatten()
+        acc_x = np.array(fam[['fid']], dtype=np.int).flatten()
         markers = np.array(bim[['snp']]).flatten()
     else:
         sys.exit("Only hdf5, h5py, plink and csv files are supported")
     if k_file != 'not_prov':
         if type_k == 'hdf5' or type_k == 'h5py':
             k = h5py.File(k_file, 'r')
-            acc_K = np.asarray(k['accessions'][:], dtype=np.int)
+            acc_k = np.asarray(k['accessions'][:], dtype=np.int)
         elif type_k == 'csv':
             k = pd.read_csv(k_file, index_col=0)
-            acc_K = k.index
+            acc_k = k.index
             k = np.array(k, dtype=np.float32)
 
-    acc_Y = np.asarray(y_phe[['accession_id']]).flatten()
-    acc_isec = [isec for isec in acc_X if isec in acc_Y]
+    acc_y = np.asarray(y_phe[['accession_id']]).flatten()
+    acc_isec = [isec for isec in acc_x if isec in acc_y]
 
-    idx_acc = list(map(lambda x: x in acc_isec, acc_X))
-    idy_acc = list(map(lambda x: x in acc_isec, acc_Y))
+    idx_acc = list(map(lambda x: x in acc_isec, acc_x))
+    idy_acc = list(map(lambda x: x in acc_isec, acc_y))
     if k_file != 'not_prov':
-        idk_acc = list(map(lambda x: x in acc_isec, acc_K))
+        idk_acc = list(map(lambda x: x in acc_isec, acc_k))
     else:
         cof = 0
     if cof_file != 0:
         cof = pd.read_csv(cof_file, index_col=0)
         idc = cof.index
         cof = np.array(cof['cof'])
-        acc_isec = [isec for isec in idc if isec in acc_Y]
+        acc_isec = [isec for isec in idc if isec in acc_y]
         idc_acc = list(map(lambda x: x in acc_isec, idc))
         if not all(idx_acc):
             print('''
@@ -76,44 +76,44 @@ def load_and_prepare_data(x_file, y_file, k_file, m, cof_file):
             quit()
     y_phe_ = np.asarray(y_phe.drop('accession_id', 1), dtype=np.float32)[idy_acc, :]
     if type_x == 'hdf5' or type_x == 'h5py':
-        X = np.asarray(SNP['snps'][0:(len(SNP['snps']) + 1), ],
+        x_gen = np.asarray(snp['snps'][0:(len(snp['snps']) + 1), ],
                        dtype=np.float32)[:, idx_acc].T
-        X = X[np.argsort(acc_X[idx_acc]), :]
+        x_gen = x_gen[np.argsort(acc_x[idx_acc]), :]
         if k_file != 'not_prov':
             k1 = np.asarray(k['kinship'][:])[idk_acc, :]
             kin_vr = k1[:, idk_acc]
-            kin_vr = kin_vr[np.argsort(acc_X[idx_acc]), :]
-            kin_vr = kin_vr[:, np.argsort(acc_X[idx_acc])]
+            kin_vr = kin_vr[np.argsort(acc_x[idx_acc]), :]
+            kin_vr = kin_vr[:, np.argsort(acc_x[idx_acc])]
         else:
-            kin_vr = kinship(X)
+            kin_vr = kinship(x_gen)
     elif type_x.lower() == 'plink':
-        X = np.asarray(bed.compute() / 2, dtype=np.float32)[:, idx_acc].T
+        x_gen = np.asarray(bed.compute() / 2, dtype=np.float32)[:, idx_acc].T
         if k_file != 'not_prov':
             k1 = np.asarray(k['kinship'][:])[idk_acc, :]
             kin_vr = k1[:, idk_acc]
-            kin_vr = kin_vr[np.argsort(acc_X[idx_acc]), :]
-            kin_vr = kin_vr[:, np.argsort(acc_X[idx_acc])]
+            kin_vr = kin_vr[np.argsort(acc_x[idx_acc]), :]
+            kin_vr = kin_vr[:, np.argsort(acc_x[idx_acc])]
         else:
-            kin_vr = kinship(X)
+            kin_vr = kinship(x_gen)
     else:
-        X = X[idx_acc, :]
+        x_gen = x_gen[idx_acc, :]
         if k_file != 'not_prov':
             k1 = k[idk_acc, :]
             kin_vr = k1[:, idk_acc]
         else:
-            kin_vr = kinship(X)
+            kin_vr = kinship(x_gen)
 
     print("data has been imported")
-    return X, kin_vr, y_phe_, markers, cof
+    return x_gen, kin_vr, y_phe_, markers, cof
 
 
-def mac_filter(mac_min, X, markers):
-    ac1 = np.sum(X, axis=0)
-    ac0 = X.shape[0] - ac1
+def mac_filter(mac_min, x_gen, markers):
+    ac1 = np.sum(x_gen, axis=0)
+    ac0 = x_gen.shape[0] - ac1
     macs = np.minimum(ac1, ac0)
     markers_used = markers[macs >= mac_min]
-    X = X[:, macs >= mac_min]
-    return markers_used, X, macs
+    x_gen = x_gen[:, macs >= mac_min]
+    return markers_used, x_gen, macs
 
 # calculate betas and se of betas
 
@@ -232,19 +232,19 @@ def get_f1(rss_env, r1_full, n):
             rss_env, r1_full), tf.divide(
             r1_full, (n - 3)))
 
-def get_pval(F_dist, n):
-    return 1 - f.cdf(F_dist, 1, n - 3)
+def get_pval(f_dist, n):
+    return 1 - f.cdf(f_dist, 1, n - 3)
 
 
 def get_r1_full(marker, y_t2d, int_t, x_sub):
     return tf.map_fn(lambda a: rss(a, marker, y_t2d, int_t), x_sub.T)
 
 
-def gwas(X, kin_vr, y_phe, batch_size, cof):
+def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
 #    with open("test_data/cof_test", 'wb') as f:
 #        pickle.dump(cof, f)
     y_phe = y_phe.flatten()
-    n_marker = X.shape[1]
+    n_marker = x_gen.shape[1]
     n = len(y_phe)
     # REML
     k_stand = get_k_stand(kin_vr)
@@ -265,12 +265,12 @@ def gwas(X, kin_vr, y_phe, batch_size, cof):
     for i in range(int(np.ceil(n_marker / batch_size))):
         tf.compat.v1.reset_default_graph()
         if n_marker < batch_size:
-            x_sub = X
+            x_sub = x_gen
         else:
             lower_limit = batch_size * i
             upper_limit = batch_size * i + batch_size
             if upper_limit <= n_marker:
-                x_sub = X[:, lower_limit:upper_limit]
+                x_sub = x_gen[:, lower_limit:upper_limit]
                 print(
                     "Working on markers ",
                     lower_limit,
@@ -279,7 +279,7 @@ def gwas(X, kin_vr, y_phe, batch_size, cof):
                     " of ",
                     n_marker)
             else:
-                x_sub = X[:, lower_limit:]
+                x_sub = x_gen[:, lower_limit:]
                 print(
                     "Working on markers ",
                     lower_limit,
@@ -298,15 +298,15 @@ def gwas(X, kin_vr, y_phe, batch_size, cof):
                     a, marker, y_t2d, int_t, cof_t), x_sub.T)
         else:
             r1_full = get_r1_full(marker, y_t2d, int_t, x_sub)
-        F_1 = get_f1(rss_env, r1_full, n)
+        f_1 = get_f1(rss_env, r1_full, n)
         if i == 0:
-            output = sess.run(get_output(F_1, x_sub, StdERR))
+            output = sess.run(get_output(f_1, x_sub, StdERR))
         else:
-            tmp = sess.run(get_output(F_1, x_sub, StdERR))
+            tmp = sess.run(get_output(f_1, x_sub, StdERR))
             output = np.append(output, tmp, axis=0)
         sess.close()
-        F_dist = output[:, 0]
-    pval = get_pval(F_dist, n)
+        f_dist = output[:, 0]
+    pval = get_pval(f_dist, n)
     output[:, 0] = pval
  #   with open("test_data/cof_output", 'wb') as f: pickle.dump(output, f)
     return output
