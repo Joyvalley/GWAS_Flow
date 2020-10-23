@@ -29,7 +29,7 @@ def manhattan(res_name, perm):
     nbp = list()
     for i in res.chr.unique():
         nbp.append(np.max(res[res['chr'] == i]['pos']))
-        bla.append(res[res['chr'] == i]['pos'] + s)
+        bla.append(res[res['chr'] == i]['pos'] + my_s)
         my_s = my_s + nbp[i - 1]
     my_bla = [y for x in bla for y in x]
     res['BPcum'] = my_bla

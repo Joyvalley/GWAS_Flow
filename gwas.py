@@ -3,13 +3,13 @@ import sys
 import time
 import numpy as np
 import pandas as pd
-import h5py
+import h5py as h5
 import main
 
 # set defaults
 BATCH_SIZE = 500000
 OUT_FILE = "results.csv"
-m = 'phenotype_value'
+M_PHE  = 'phenotype_value'
 PERM = 1
 MAC_MIN = 1
 COF_FILE = 0
@@ -28,7 +28,7 @@ for i in range(1, len(sys.argv), 2):
     elif sys.argv[i] == "-k" or sys.argv[i] == "--kinship":
         K_FILE = sys.argv[i + 1]
     elif sys.argv[i] == "-m":
-        m = sys.argv[i + 1]
+        M_PHE = sys.argv[i + 1]
     elif sys.argv[i] == "-a" or sys.argv[i] == "--mac_min":
         MAC_MIN = int(sys.argv[i + 1])
     elif sys.argv[i] == "-bs" or sys.argv[i] == "--batch-size":
@@ -70,7 +70,7 @@ print("parsed commandline arguments")
 start = time.time()
 
 X, K, Y_, markers, COF = main.load_and_prepare_data(
-    X_FILE, Y_FILE, K_FILE, m, COF_FILE)
+    X_FILE, Y_FILE, K_FILE, M_PHE, COF_FILE)
 
 
 # MAF filterin
@@ -87,7 +87,7 @@ elif X_FILE.split(".")[-1].lower() == 'plink':
     my_pos = [i.split("_")[1] for i in markers_used]
     CHR_POS = np.vstack((my_chr, my_pos)).T
 else:
-    chr_reg = h5py.FILE(X_FILE, 'r')['positions'].attrs['chr_regions']
+    chr_reg = h5.FILE(X_FILE, 'r')['positions'].attrs['chr_regions']
     mk_index = np.array(range(len(markers)), dtype=int)[macs >= MAC_MIN]
     CHR_POS = np.array(
         [list(map(lambda x: sum(x > chr_reg[:, 1]) + 1, mk_index)), markers_used]).T
@@ -142,7 +142,7 @@ eltime = np.round(end - start, 2)
 
 if eltime <= 59:
     print("Total time elapsed", eltime, "seconds")
-elif eltime > 59 and eltime <= 3600:
+elif 59 < eltime <= 3600:
     print("Total time elapsed", np.round(eltime / 60, 2), "minutes")
 elif eltime > 3600:
     print("Total time elapsed", np.round(eltime / 60 / 60, 2), "hours")
