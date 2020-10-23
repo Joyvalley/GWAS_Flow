@@ -3,7 +3,6 @@ import numpy as np
 import sys
 from scipy.stats import f
 import tensorflow as tf
-import limix
 import herit
 import h5py
 import limix
