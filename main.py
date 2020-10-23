@@ -11,31 +11,33 @@ import pickle
 
 
 
-def kinship(M):
-    mafs = np.sum(M, axis=0) / M.shape[0]
-    P = np.repeat(mafs, M.shape[0]).reshape(M.shape[0], M.shape[1], order="F")
-    Z = M - P
-    K = (np.matmul(Z, Z.T)) / (2 * np.sum(mafs * (1 - mafs)))
-    return K
+def kinship(marker):
+    n_phe = marker.shape[0]
+    n_mar = marker.shape[1]
+    mafs = np.sum(marker, axis=0) / n_phe
+    p_mat  = np.repeat(mafs, n_phe).reshape(n_phe, n_mar, order="F")
+    z_mat  = marker - p_mat
+    kin_vr = (np.matmul(z_mat, z_mat.T)) / (2 * np.sum(mafs * (1 - mafs)))
+    return kin_vr
 
 
 def load_and_prepare_data(x_file, y_file, k_file, m, cof_file):
     if k_file != 'not_prov':
-        type_K = k_file.split(".")[-1]
-    type_X = x_file.split(".")[-1]
-    Y = pd.read_csv(y_file, engine='python').sort_values(
+        type_k = k_file.split(".")[-1]
+    type_x = x_file.split(".")[-1]
+    y_phe = pd.read_csv(y_file, engine='python').sort_values(
         ['accession_id']).groupby('accession_id').mean()
-    Y = pd.DataFrame({'accession_id': Y.index, 'phenotype_value': Y[m]})
-    if type_X == 'hdf5' or type_X == 'h5py':
+    y_phe = pd.DataFrame({'accession_id': y_phe.index, 'phenotype_value': y_phe[m]})
+    if type_x == 'hdf5' or type_x == 'h5py':
         SNP = h5py.File(x_file, 'r')
         markers = np.asarray(SNP['positions'])
         acc_X = np.asarray(SNP['accessions'][:], dtype=np.int)
-    elif type_X == 'csv':
+    elif type_x == 'csv':
         X = pd.read_csv(x_file, index_col=0)
         markers = X.columns.values
         acc_X = X.index
         X = np.asarray(X, dtype=np.float32) / 2
-    elif type_X.lower() == 'plink':
+    elif type_x.lower() == 'plink':
         my_prefix = x_file.split(".")[0]
         (bim, fam, bed) = read_plink(my_prefix)
         acc_X = np.array(fam[['fid']], dtype=np.int).flatten()
@@ -43,15 +45,15 @@ def load_and_prepare_data(x_file, y_file, k_file, m, cof_file):
     else:
         sys.exit("Only hdf5, h5py, plink and csv files are supported")
     if k_file != 'not_prov':
-        if type_K == 'hdf5' or type_K == 'h5py':
+        if type_k == 'hdf5' or type_k == 'h5py':
             k = h5py.File(k_file, 'r')
             acc_K = np.asarray(k['accessions'][:], dtype=np.int)
-        elif type_K == 'csv':
+        elif type_k == 'csv':
             k = pd.read_csv(k_file, index_col=0)
             acc_K = k.index
             k = np.array(k, dtype=np.float32)
 
-    acc_Y = np.asarray(Y[['accession_id']]).flatten()
+    acc_Y = np.asarray(y_phe[['accession_id']]).flatten()
     acc_isec = [isec for isec in acc_X if isec in acc_Y]
 
     idx_acc = list(map(lambda x: x in acc_isec, acc_X))
@@ -72,37 +74,37 @@ def load_and_prepare_data(x_file, y_file, k_file, m, cof_file):
                 identical to the ones in the phenotype file
             ''')
             quit()
-    Y_ = np.asarray(Y.drop('accession_id', 1), dtype=np.float32)[idy_acc, :]
-    if type_X == 'hdf5' or type_X == 'h5py':
+    y_phe_ = np.asarray(y_phe.drop('accession_id', 1), dtype=np.float32)[idy_acc, :]
+    if type_x == 'hdf5' or type_x == 'h5py':
         X = np.asarray(SNP['snps'][0:(len(SNP['snps']) + 1), ],
                        dtype=np.float32)[:, idx_acc].T
         X = X[np.argsort(acc_X[idx_acc]), :]
         if k_file != 'not_prov':
             k1 = np.asarray(k['kinship'][:])[idk_acc, :]
-            K = k1[:, idk_acc]
-            K = K[np.argsort(acc_X[idx_acc]), :]
-            K = K[:, np.argsort(acc_X[idx_acc])]
+            kin_vr = k1[:, idk_acc]
+            kin_vr = kin_vr[np.argsort(acc_X[idx_acc]), :]
+            kin_vr = kin_vr[:, np.argsort(acc_X[idx_acc])]
         else:
-            K = kinship(X)
-    elif type_X.lower() == 'plink':
+            kin_vr = kinship(X)
+    elif type_x.lower() == 'plink':
         X = np.asarray(bed.compute() / 2, dtype=np.float32)[:, idx_acc].T
         if k_file != 'not_prov':
             k1 = np.asarray(k['kinship'][:])[idk_acc, :]
-            K = k1[:, idk_acc]
-            K = K[np.argsort(acc_X[idx_acc]), :]
-            K = K[:, np.argsort(acc_X[idx_acc])]
+            kin_vr = k1[:, idk_acc]
+            kin_vr = kin_vr[np.argsort(acc_X[idx_acc]), :]
+            kin_vr = kin_vr[:, np.argsort(acc_X[idx_acc])]
         else:
-            K = kinship(X)
+            kin_vr = kinship(X)
     else:
         X = X[idx_acc, :]
         if k_file != 'not_prov':
             k1 = k[idk_acc, :]
-            K = k1[:, idk_acc]
+            kin_vr = k1[:, idk_acc]
         else:
-            K = kinship(X)
+            kin_vr = kinship(X)
 
     print("data has been imported")
-    return X, K, Y_, markers, cof
+    return X, kin_vr, y_phe_, markers, cof
 
 
 def mac_filter(mac_min, X, markers):
@@ -114,12 +116,13 @@ def mac_filter(mac_min, X, markers):
     return markers_used, X, macs
 
 # calculate betas and se of betas
-def stderr(a, M, Y_t2d, int_t):
+
+def stderr(a, marker, y_t2d, int_t):
     n = len(int_t)
     x = tf.stack(
         (int_t, tf.squeeze(
             tf.matmul(
-                M.T, tf.reshape(
+                marker.T, tf.reshape(
                     a, (n, -1))))), axis=1)
     coeff = tf.matmul(
         tf.matmul(
@@ -128,8 +131,8 @@ def stderr(a, M, Y_t2d, int_t):
                     tf.transpose(x),
                     x)),
             tf.transpose(x)),
-        Y_t2d)
-    SSE = tf.reduce_sum(tf.math.square(tf.math.subtract(Y_t2d, tf.math.add(
+        y_t2d)
+    SSE = tf.reduce_sum(tf.math.square(tf.math.subtract(y_t2d, tf.math.add(
         tf.math.multiply(x[:, 1], coeff[0, 0]), tf.math.multiply(x[:, 1], coeff[1, 0])))))
     SE = tf.math.sqrt(SSE / (471 - (1 + 2)))
     StdERR = tf.sqrt(
@@ -145,119 +148,119 @@ def stderr(a, M, Y_t2d, int_t):
 # calculate residual sum squares
 
 
-def rss(a, M, Y_t2d, int_t):
-    x_t = tf.reduce_sum(tf.math.multiply(M.T, a), axis=1)
+def rss(a, marker, y_t2d, int_t):
+    x_t = tf.reduce_sum(tf.math.multiply(marker.T, a), axis=1)
     lm_res = tf.linalg.lstsq(
         tf.transpose(
             tf.stack(
-                (int_t, x_t), axis=0)), Y_t2d)
+                (int_t, x_t), axis=0)), y_t2d)
     lm_x = tf.concat((tf.squeeze(lm_res), x_t), axis=0)
-    return tf.reduce_sum(tf.math.square(tf.math.subtract(tf.squeeze(Y_t2d), tf.math.add(
+    return tf.reduce_sum(tf.math.square(tf.math.subtract(tf.squeeze(y_t2d), tf.math.add(
         tf.math.multiply(lm_x[1], lm_x[2:]), tf.multiply(lm_x[0], int_t)))))
 
 # calculate residual sum squares with co-variates
 
 
-def rss_cof(a, M, Y_t2d, int_t, cof_t):
-    x_t = tf.reduce_sum(tf.math.multiply(M.T, a), axis=1)
+def rss_cof(a, marker, y_t2d, int_t, cof_t):
+    x_t = tf.reduce_sum(tf.math.multiply(marker.T, a), axis=1)
     lm_res = tf.linalg.lstsq(
         tf.transpose(
             tf.stack(
-                (int_t, x_t, cof_t), axis=0)), Y_t2d)
+                (int_t, x_t, cof_t), axis=0)), y_t2d)
     return tf.math.reduce_sum(tf.math.square(
-        Y_t2d - (lm_res[1] * x_t + lm_res[0] * int_t + lm_res[2] * cof_t)))
+        y_t2d - (lm_res[1] * x_t + lm_res[0] * int_t + lm_res[2] * cof_t)))
 
 
 
-def get_K_stand(K):
-    n = K.shape[0]
-    return (n - 1) / np.sum((np.identity(n) - np.ones((n, n)) / n) * K) * K
+def get_k_stand(kin_vr):
+    n = kin_vr.shape[0]
+    return (n - 1) / np.sum((np.identity(n) - np.ones((n, n)) / n) * kin_vr) * kin_vr
 
 
-def get_herit(Y, K_stand):
-    return herit.estimate(Y, "normal", K_stand, verbose=False)
+def get_herit(y_phe, k_stand):
+    return herit.estimate(y_phe, "normal", k_stand, verbose=False)
 
 
-def transform_kinship(vg, K_stand, ve):
-    n = K_stand.shape[0]
+def transform_kinship(vg, k_stand, ve):
+    n = k_stand.shape[0]
     return np.transpose(
         np.linalg.inv(
             np.linalg.cholesky(
                 vg *
-                K_stand +
+                k_stand +
                 ve *
                 np.identity(n)))).astype(
         np.float32)
 
 
-def transform_Y(M, Y):
-    return np.sum(np.multiply(np.transpose(M), Y), axis=1).astype(np.float32)
+def transform_y(marker, y_phe):
+    return np.sum(np.multiply(np.transpose(marker), y_phe), axis=1).astype(np.float32)
 
 
-def transform_int(M):
-    n = M.shape[0]
+def transform_int(marker):
+    n = marker.shape[0]
     return np.sum(
         np.multiply(
-            np.transpose(M),
+            np.transpose(marker),
             np.ones(n)),
         axis=1).astype(
             np.float32)
 
 
-def emmax(int_t, Y_t):
+def emmax(int_t, y_trans):
     n = len(int_t)
     return (np.linalg.lstsq(np.reshape(int_t, (n, -1)),
-                            np.reshape(Y_t, (n, -1)), rcond=None)[1]).astype(np.float32)
+                            np.reshape(y_trans, (n, -1)), rcond=None)[1]).astype(np.float32)
 
 
-def transform_cof(M, cof):
-    return np.sum(np.multiply(np.transpose(M), cof), axis=1).astype(np.float32)
+def transform_cof(marker, cof):
+    return np.sum(np.multiply(np.transpose(marker), cof), axis=1).astype(np.float32)
 
 
 
-def getOutput(F_1, x_sub, StdERR):
+def get_output(F_1, x_sub, StdERR):
     return tf.concat([tf.reshape(F_1, (x_sub.shape[1], -1)), StdERR], axis=1)
 
 
-def getSTDERR(M, Y_t2d, int_t, x_sub):
-    return tf.map_fn(lambda a: stderr(a, M, Y_t2d, int_t), x_sub.T)
+def get_stderr(marker, y_t2d, int_t, x_sub):
+    return tf.map_fn(lambda a: stderr(a, marker, y_t2d, int_t), x_sub.T)
 
 
-def getF1(RSS_env, R1_full, n):
+def get_f1(rss_env, r1_full, n):
     return tf.divide(
         tf.subtract(
-            RSS_env, R1_full), tf.divide(
-            R1_full, (n - 3)))
+            rss_env, r1_full), tf.divide(
+            r1_full, (n - 3)))
 
-def getPval(F_dist, n):
+def get_pval(F_dist, n):
     return 1 - f.cdf(F_dist, 1, n - 3)
 
 
-def getR1Full(M, Y_t2d, int_t, x_sub):
-    return tf.map_fn(lambda a: rss(a, M, Y_t2d, int_t), x_sub.T)
+def get_r1_full(marker, y_t2d, int_t, x_sub):
+    return tf.map_fn(lambda a: rss(a, marker, y_t2d, int_t), x_sub.T)
 
 
-def gwas(X, K, Y, batch_size, cof):
+def gwas(X, kin_vr, y_phe, batch_size, cof):
 #    with open("test_data/cof_test", 'wb') as f:
 #        pickle.dump(cof, f)
-    Y = Y.flatten()
+    y_phe = y_phe.flatten()
     n_marker = X.shape[1]
-    n = len(Y)
+    n = len(y_phe)
     # REML
-    K_stand = get_K_stand(K)
-    vg, delta, ve = get_herit(Y, K_stand)
+    k_stand = get_k_stand(kin_vr)
+    vg, delta, ve = get_herit(y_phe, k_stand)
     print(" Pseudo-heritability is ", vg / (ve + vg + delta))
     print(" Performing GWAS on ", n, " phenotypes and ", n_marker, "markers")
     # Transform kinship-matrix, phenotypes and estimate intercpt
    #  Xo = np.ones(K.shape[0]).flatten()
-    M = transform_kinship(vg, K_stand, ve)
-    Y_t = transform_Y(M, Y)
-    int_t = transform_int(M)
+    marker = transform_kinship(vg, k_stand, ve)
+    y_trans = transform_y(marker, y_phe)
+    int_t = transform_int(marker)
     # transform  co-factor
     if isinstance(cof, int) == False:
-        cof_t = transform_cof(M, cof)
+        cof_t = transform_cof(marker, cof)
     # EMMAX Scan
-    RSS_env = emmax(int_t, Y_t)
+    rss_env = emmax(int_t, y_trans)
     # loop over th batches
     for i in range(int(np.ceil(n_marker / batch_size))):
         tf.compat.v1.reset_default_graph()
@@ -286,24 +289,24 @@ def gwas(X, K, Y, batch_size, cof):
                     n_marker)
         config = tf.compat.v1.ConfigProto()
         sess = tf.compat.v1.Session(config=config)
-        Y_t2d = tf.cast(tf.reshape(Y_t, (n, -1)), dtype=tf.float32)
-      #  y_tensor =  tf.convert_to_tensor(Y_t,dtype = tf.float32)
-        StdERR = getSTDERR(M, Y_t2d, int_t, x_sub)
+        y_t2d = tf.cast(tf.reshape(y_trans, (n, -1)), dtype=tf.float32)
+      #  y_tensor =  tf.convert_to_tensor(y_trans,dtype = tf.float32)
+        StdERR = get_stderr(marker, y_t2d, int_t, x_sub)
         if isinstance(cof, int) == False:
-            R1_full = tf.map_fn(
+            r1_full = tf.map_fn(
                 lambda a: rss_cof(
-                    a, M, Y_t2d, int_t, cof_t), x_sub.T)
+                    a, marker, y_t2d, int_t, cof_t), x_sub.T)
         else:
-            R1_full = getR1Full(M, Y_t2d, int_t, x_sub)
-        F_1 = getF1(RSS_env, R1_full, n)
+            r1_full = get_r1_full(marker, y_t2d, int_t, x_sub)
+        F_1 = get_f1(rss_env, r1_full, n)
         if i == 0:
-            output = sess.run(getOutput(F_1, x_sub, StdERR))
+            output = sess.run(get_output(F_1, x_sub, StdERR))
         else:
-            tmp = sess.run(getOutput(F_1, x_sub, StdERR))
+            tmp = sess.run(get_output(F_1, x_sub, StdERR))
             output = np.append(output, tmp, axis=0)
         sess.close()
         F_dist = output[:, 0]
-    pval = getPval(F_dist, n)
+    pval = get_pval(F_dist, n)
     output[:, 0] = pval
  #   with open("test_data/cof_output", 'wb') as f: pickle.dump(output, f)
     return output
