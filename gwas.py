@@ -87,7 +87,7 @@ elif X_FILE.split(".")[-1].lower() == 'plink':
     my_pos = [i.split("_")[1] for i in markers_used]
     CHR_POS = np.vstack((my_chr, my_pos)).T
 else:
-    chr_reg = h5.file(X_FILE, 'r')['positions'].attrs['chr_regions']
+    chr_reg = h5.File(X_FILE, 'r')['positions'].attrs['chr_regions']
     mk_index = np.array(range(len(markers)), dtype=int)[macs >= MAC_MIN]
     CHR_POS = np.array(
         [list(map(lambda x: sum(x > chr_reg[:, 1]) + 1, mk_index)), markers_used]).T
