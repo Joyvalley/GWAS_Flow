@@ -5,7 +5,7 @@ def estimate(y, lik, K, M=None, verbose=True):
     from glimix_core.glmm import GLMMExpFam
     from glimix_core.lmm import LMM
     from limix._data._assert import assert_likelihood
-    from limix._data import normalize_likelihood, conform_dataset 
+    from limix._data import normalize_likelihood, conform_dataset
     from limix.qtl._assert import assert_finite
     from limix._display import session_block, session_line
     lik = normalize_likelihood(lik)
@@ -33,5 +33,4 @@ def estimate(y, lik, K, M=None, verbose=True):
         if lik_name == "bernoulli":
             e += pi * pi / 3
         v = var(method.mean())
-        return g , v , e 
-
+        return g, v, e
