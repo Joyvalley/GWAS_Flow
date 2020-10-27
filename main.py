@@ -139,7 +139,7 @@ def stderr_func(itt, marker, y_t2d, int_t):
         y_t2d)
     sum_sq_e = tf.reduce_sum(tf.math.square(tf.math.subtract(y_t2d, tf.math.add(
         tf.math.multiply(x[:, 1], coeff[0, 0]), tf.math.multiply(x[:, 1], coeff[1, 0])))))
-    stand_err = tf.math.sqrt(sum_sq_e / (n_phe - (1 + 2)))
+    stand_err = tf.math.sqrt(sum_sq_e / (471 - (1 + 2)))
     stdr_glob = tf.sqrt(
         tf.linalg.diag_part(
             tf.math.multiply(
