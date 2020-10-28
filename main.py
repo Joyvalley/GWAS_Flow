@@ -1,4 +1,3 @@
-'''  main functions to perform gwas called in main.py '''
 import sys
 import pandas as pd
 import numpy as np
