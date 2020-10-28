@@ -7,7 +7,7 @@ import tensorflow as tf
 from pandas_plink import read_plink
 import h5py
 import herit
-# import pickle
+#import pickle
 
 
 
@@ -139,7 +139,7 @@ def stderr_func(itt, marker, y_t2d, int_t):
         y_t2d)
     sum_sq_e = tf.reduce_sum(tf.math.square(tf.math.subtract(y_t2d, tf.math.add(
         tf.math.multiply(x[:, 1], coeff[0, 0]), tf.math.multiply(x[:, 1], coeff[1, 0])))))
-    stand_err = tf.math.sqrt(sum_sq_e / (471 - (1 + 2)))
+    stand_err = tf.math.sqrt(sum_sq_e / (n_phe - (1 + 2)))
     stdr_glob = tf.sqrt(
         tf.linalg.diag_part(
             tf.math.multiply(
@@ -330,5 +330,5 @@ def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
         f_dist = output[:, 0]
     pval = get_pval(f_dist, n_phe)
     output[:, 0] = pval
- #   with open("test_data/cof_output", 'wb') as f: pickle.dump(output, f)
+  #  with open("test_data/cof_output", 'wb') as f: pickle.dump(output, f)
     return output

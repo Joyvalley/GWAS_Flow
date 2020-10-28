@@ -30,8 +30,9 @@ class TestGwas(unittest.TestCase):
         with open('test_data/cof_output', 'rb') as coutput:
             cof_output = pickle.load(coutput)
         batch_size = 500000
+        print(output)
         self.assertIsNone(
-            np.testing.assert_array_equal(
+            np.testing.assert_array_almost_equal(
                 main.gwas(
                     x_gen,
                     kin_mat,
@@ -40,7 +41,7 @@ class TestGwas(unittest.TestCase):
                     cof=0),
                 output))
         self.assertIsNone(
-            np.testing.assert_array_equal(
+            np.testing.assert_array_almost_equal(
                 main.gwas(
                     x_gen,
                     kin_mat,
