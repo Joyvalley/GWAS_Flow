@@ -21,6 +21,39 @@ def kinship(marker):
     return kin_vr
 
 
+def parse_csv(x_file, y_file, k_file, m_phe, cof_file):
+    ''' parse csv input data '''
+    x_gen = pd.read_csv(x_file, index_col=0)
+    markers = x_gen.columns.values
+    acc_x = x_gen.index
+    x_gen = np.asarray(x_gen, dtype=np.float32) / 2
+    return x_gen,  markers, acc_x
+
+def parse_hdf5(x_file, y_file, k_file, m_phe, cof_file):
+    ''' parse hdf5 input data '''
+    snp = h5py.File(x_file, 'r')
+    markers = np.asarray(snp['positions'])
+    acc_x = np.asarray(snp['accessions'][:], dtype=np.int)
+    return markers, acc_x
+
+def parse_plink(x_file, y_file, k_file, m_phe, cof_file):
+    ''' parse plink input data '''
+    my_prefix = x_file.split(".")[0]
+    (bim, fam, bed) = read_plink(my_prefix)
+    acc_x = np.array(fam[['fid']], dtype=np.int).flatten()
+    markers = np.array(bim[['snp']]).flatten()
+    return markers, acc_x
+
+def trimm_kin(k,idk_acc):
+    ''' trimm the kinship matrix to the accessions in the phenotype'''
+    k_1 = np.asarray(k['kinship'][:])[idk_acc, :]
+    kin_vr = k_1[:, idk_acc]
+    kin_vr = kin_vr[np.argsort(acc_x[idx_acc]), :]
+    kin_vr = kin_vr[:, np.argsort(acc_x[idx_acc])]
+    return kin_vr 
+
+
+
 def load_and_prepare_data(x_file, y_file, k_file, m_phe, cof_file):
     ''' etl the data '''
     if k_file != 'not_prov':
@@ -30,19 +63,12 @@ def load_and_prepare_data(x_file, y_file, k_file, m_phe, cof_file):
         ['accession_id']).groupby('accession_id').mean()
     y_phe = pd.DataFrame({'accession_id': y_phe.index, 'phenotype_value': y_phe[m_phe]})
     if type_x in ('hdf5',  'h5py'):
-        snp = h5py.File(x_file, 'r')
-        markers = np.asarray(snp['positions'])
-        acc_x = np.asarray(snp['accessions'][:], dtype=np.int)
+        markers, acc_x = parse_hdf5(x_file, y_file, k_file, m_phe, cof_file)
     elif type_x == 'csv':
-        x_gen = pd.read_csv(x_file, index_col=0)
-        markers = x_gen.columns.values
-        acc_x = x_gen.index
-        x_gen = np.asarray(x_gen, dtype=np.float32) / 2
+       x_gen,  markers, acc_x = parse_csv(x_file, y_file, k_file, m_phe, cof_file)
     elif type_x.lower() == 'plink':
-        my_prefix = x_file.split(".")[0]
-        (bim, fam, bed) = read_plink(my_prefix)
-        acc_x = np.array(fam[['fid']], dtype=np.int).flatten()
-        markers = np.array(bim[['snp']]).flatten()
+        markers, acc_x = parse_plink(x_file, y_file, k_file, m_phe, cof_file)
+
     else:
         sys.exit("Only hdf5, h5py, plink and csv files are supported")
     if k_file != 'not_prov':
@@ -82,19 +108,13 @@ def load_and_prepare_data(x_file, y_file, k_file, m_phe, cof_file):
                        dtype=np.float32)[:, idx_acc].T
         x_gen = x_gen[np.argsort(acc_x[idx_acc]), :]
         if k_file != 'not_prov':
-            k_1 = np.asarray(k['kinship'][:])[idk_acc, :]
-            kin_vr = k_1[:, idk_acc]
-            kin_vr = kin_vr[np.argsort(acc_x[idx_acc]), :]
-            kin_vr = kin_vr[:, np.argsort(acc_x[idx_acc])]
+            kin_vr = trimm_kin(k,idk_acc)
         else:
             kin_vr = kinship(x_gen)
     elif type_x.lower() == 'plink':
         x_gen = np.asarray(bed.compute() / 2, dtype=np.float32)[:, idx_acc].T
         if k_file != 'not_prov':
-            k_1 = np.asarray(k['kinship'][:])[idk_acc, :]
-            kin_vr = k_1[:, idk_acc]
-            kin_vr = kin_vr[np.argsort(acc_x[idx_acc]), :]
-            kin_vr = kin_vr[:, np.argsort(acc_x[idx_acc])]
+            kin_vr = trimm_kin(k,idk_acc)
         else:
             kin_vr = kinship(x_gen)
     else:
@@ -319,12 +339,12 @@ def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
             r1_full = get_r1_full(marker, y_t2d, int_t, x_sub)
         f_1 = get_f1(rss_env, r1_full, n_phe)
         if i == 0:
-            output = get_output(f_1, x_sub, stdr_glob)
+            output = np.array(get_output(f_1, x_sub, stdr_glob))
         else:
             tmp = get_output(f_1, x_sub, stdr_glob)
             output = np.append(output, tmp, axis=0)
         f_dist = output[:, 0]
     pval = get_pval(f_dist, n_phe)
-    np.array(output)[:, 0] = pval
+    output[:, 0] = pval
   #  with open("test_data/cof_output", 'wb') as f: pickle.dump(output, f)
     return output
