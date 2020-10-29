@@ -5,10 +5,9 @@ channels:
 dependencies:
   - matplotlib==3.3.2
   - pandas=1.0.1
-  - python==3.7.3
-  - tensorflow==1.14
+  - python==3.8.5
+  - tensorflow==2.2.0
   - scipy==1.2.1
-  - tensorflow==1.14
   - pip==19.0.*
   - numpy==1.16.4
   - pip:

@@ -273,7 +273,7 @@ def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
     print(" Pseudo-heritability is ", v_g / (v_e + v_g + delta))
     print(" Performing GWAS on ", n_phe, " phenotypes and ", n_marker, "markers")
     # Transform kinship-matrix, phenotypes and estimate intercpt
-   #  Xo = np.ones(K.shape[0]).flatten()
+    # Xo = np.ones(K.shape[0]).flatten()
     marker = transform_kinship(v_g, k_stand, v_e)
     y_trans = transform_y(marker, y_phe)
     int_t = transform_int(marker)
@@ -308,8 +308,6 @@ def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
                     n_marker,
                     " of ",
                     n_marker)
-        config = tf.compat.v1.ConfigProto()
-        sess = tf.compat.v1.Session(config=config)
         y_t2d = tf.cast(tf.reshape(y_trans, (n_phe, -1)), dtype=tf.float32)
       #  y_tensor =  tf.convert_to_tensor(y_trans,dtype = tf.float32)
         stdr_glob = get_stderr(marker, y_t2d, int_t, x_sub)
@@ -321,13 +319,12 @@ def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
             r1_full = get_r1_full(marker, y_t2d, int_t, x_sub)
         f_1 = get_f1(rss_env, r1_full, n_phe)
         if i == 0:
-            output = sess.run(get_output(f_1, x_sub, stdr_glob))
+            output = get_output(f_1, x_sub, stdr_glob)
         else:
-            tmp = sess.run(get_output(f_1, x_sub, stdr_glob))
+            tmp = get_output(f_1, x_sub, stdr_glob)
             output = np.append(output, tmp, axis=0)
-        sess.close()
         f_dist = output[:, 0]
     pval = get_pval(f_dist, n_phe)
-    output[:, 0] = pval
+    np.array(output)[:, 0] = pval
   #  with open("test_data/cof_output", 'wb') as f: pickle.dump(output, f)
     return output
