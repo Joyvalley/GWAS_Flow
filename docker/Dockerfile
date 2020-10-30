@@ -36,7 +36,11 @@ RUN conda update conda
 RUN conda install tensorflow==1.14
 RUN conda install scipy
 RUN conda install numpy
-RUN conda install pandas==1.0.1
+RUN conda install pandas==1.1.3
+RUN conda install tbb
+RUN conda install tqdm==4.46.1
+RUN conda install attrs=19.3.0
+RUN conda install numba
 RUN pip install limix
 RUN conda install h5py
 RUN conda install -c conda-forge pandas-plink          
