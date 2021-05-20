@@ -252,7 +252,8 @@ def get_f1(rss_env, r1_full, n_phe):
 
 def get_pval(f_dist, n_phe):
     '''get p values from f1 scores'''
-    return 1 - f.cdf(f_dist, 1, n_phe - 3)
+    return f.logsf(f_dist, 1, n_phe -3)
+    #return 1 - f.cdf(f_dist, 1, n_phe - 3)
 
 
 def get_r1_full(marker, y_t2d, int_t, x_sub):
