@@ -76,8 +76,7 @@ def load_and_prepare_data(x_file, y_file, k_file, m_phe, cof_file):
 
     y_phe_ = np.asarray(y_phe.drop('accession_id', 1), dtype=np.float32)[idy_acc, :]
     if type_x in ('hdf5', 'h5py'):
-        x_gen = np.asarray(snp['snps'][0:(len(snp['snps']) + 1), ],
-                       dtype=np.float32)[:, idx_acc].T
+        x_gen = np.asarray(snp['snps'][:, np.where(idx_acc)[0]], np.float32).T
         x_gen = x_gen[np.argsort(acc_x[idx_acc]), :]
         if k_file != 'not_prov':
             k_1 = np.asarray(k['kinship'][:])[idk_acc, :]
