@@ -6,9 +6,6 @@ import tensorflow as tf
 from pandas_plink import read_plink
 import h5py
 import herit
-import math
-#import pickle
-
 
 
 def kinship(marker):
@@ -329,7 +326,7 @@ def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
             output = np.append(output, tmp, axis=0)
         sess.close()
         f_dist = output[:, 0]
-    pval = math.exp(get_pval(f_dist, n_phe))
+    pval = np.exp(get_pval(f_dist, n_phe))
     output[:, 0] = pval
   #  with open("test_data/cof_output", 'wb') as f: pickle.dump(output, f)
     return output
