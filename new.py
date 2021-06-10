@@ -15,7 +15,7 @@ def kinship(marker):
     mafs = np.sum(marker, axis=0) / n_phe
     p_mat  = np.repeat(mafs, n_phe).reshape(n_phe, n_mar, order="F")
     z_mat  = marker - p_mat
-    kin_vr = (np.matmul(z_mat, z_mat.T)) / (2 * np.sum(mafs * (1 - mafs)))
+    kin_vr = (np.matmul(z_mat, z_mat.T)) / (4 * np.sum(mafs * (1 - mafs)))
     return kin_vr
 
 
@@ -35,7 +35,7 @@ def load_and_prepare_data(x_file, y_file, k_file, m_phe, cof_file):
         x_gen = pd.read_csv(x_file, index_col=0)
         markers = x_gen.columns.values
         acc_x = x_gen.index
-        x_gen = np.asarray(x_gen, dtype=np.float64) / 2
+        x_gen = np.asarray(x_gen, dtype=np.float64) / 4
     elif type_x.lower() == 'plink':
         my_prefix = x_file.split(".")[0]
         (bim, fam, bed) = read_plink(my_prefix)
@@ -86,7 +86,7 @@ def load_and_prepare_data(x_file, y_file, k_file, m_phe, cof_file):
         else:
             kin_vr = kinship(x_gen)
     elif type_x.lower() == 'plink':
-        x_gen = np.asarray(bed.compute() / 2, dtype=np.float64)[:, idx_acc].T
+        x_gen = np.asarray(bed.compute() / 4, dtype=np.float64)[:, idx_acc].T
         if k_file != 'not_prov':
             k_1 = np.asarray(k['kinship'][:])[idk_acc, :]
             kin_vr = k_1[:, idk_acc]
@@ -117,7 +117,7 @@ def mac_filter(mac_min, x_gen, markers):
 
 # calculate betas and se of betas
 
-def stderr_func(itt, marker, y_t2d, int_t):
+def stderr_func(itt, marker, y_t4d, int_t):
     '''returns standard errors for induvidual markers '''
     n_phe= len(int_t)
     x = tf.stack(
@@ -132,10 +132,10 @@ def stderr_func(itt, marker, y_t2d, int_t):
                     tf.transpose(x, perm=None),
                     x)),
             tf.transpose(x, perm=None)),
-        y_t2d)
-    sum_sq_e = tf.reduce_sum(tf.math.square(tf.math.subtract(y_t2d, tf.math.add(
+        y_t4d)
+    sum_sq_e = tf.reduce_sum(tf.math.square(tf.math.subtract(y_t4d, tf.math.add(
         tf.math.multiply(x[:, 1], coeff[0, 0]), tf.math.multiply(x[:, 1], coeff[1, 0])))))
-    stand_err = tf.math.sqrt(sum_sq_e / (n_phe - (1 + 2)))
+    stand_err = tf.math.sqrt(sum_sq_e / (n_phe - (1 + 4)))
     stdr_glob = tf.sqrt(
         tf.linalg.diag_part(
             tf.math.multiply(
@@ -149,29 +149,29 @@ def stderr_func(itt, marker, y_t2d, int_t):
 # calculate residual sum squares
 
 
-def rss(itt, marker, y_t2d, int_t):
+def rss(itt, marker, y_t4d, int_t):
     ''' calculates the residual sum of squares '''
     x_t = tf.reduce_sum(tf.math.multiply(marker.T, itt), axis=1)
     lm_res = tf.linalg.lstsq(
         tf.transpose(
             tf.stack(
-                (int_t, x_t), axis=0),perm=None), y_t2d, l2_regularizer=0.0)
+                (int_t, x_t), axis=0),perm=None), y_t4d, l4_regularizer=0.0)
     lm_x = tf.concat((tf.squeeze(lm_res), x_t), axis=0)
-    return tf.reduce_sum(tf.math.square(tf.math.subtract(tf.squeeze(y_t2d), tf.math.add(
-        tf.math.multiply(lm_x[1], lm_x[2:]), tf.multiply(lm_x[0], int_t)))))
+    return tf.reduce_sum(tf.math.square(tf.math.subtract(tf.squeeze(y_t4d), tf.math.add(
+        tf.math.multiply(lm_x[1], lm_x[4:]), tf.multiply(lm_x[0], int_t)))))
 
 # calculate residual sum squares with co-variates
 
 
-def rss_cof(itt, marker, y_t2d, int_t, cof_t):
+def rss_cof(itt, marker, y_t4d, int_t, cof_t):
     ''' calculates the residual sum of squares when cof is included '''
     x_t = tf.reduce_sum(tf.math.multiply(marker.T, itt), axis=1)
     lm_res = tf.linalg.lstsq(
         tf.transpose(
             tf.stack(
-                (int_t, x_t, cof_t), axis=0),perm=None), y_t2d, l2_regularizer=0.0)
+                (int_t, x_t, cof_t), axis=0),perm=None), y_t4d, l4_regularizer=0.0)
     return tf.math.reduce_sum(tf.math.square(
-        y_t2d - (lm_res[1] * x_t + lm_res[0] * int_t + lm_res[2] * cof_t)))
+        y_t4d - (lm_res[1] * x_t + lm_res[0] * int_t + lm_res[4] * cof_t)))
 
 
 
@@ -218,7 +218,7 @@ def transform_int(marker):
 
 
 def emmax(int_t, y_trans):
-    ''' run emmax according to Kang et al 2010'''
+    ''' run emmax according to Kang et al 4010'''
     n_phe= len(int_t)
     return (np.linalg.lstsq(np.reshape(int_t, (n_phe, -1)),
                             np.reshape(y_trans, (n_phe, -1)), rcond=None)[1]).astype(np.float64)
@@ -235,9 +235,9 @@ def get_output(f_1, x_sub, stdr_glob):
     return tf.concat([tf.reshape(f_1, (x_sub.shape[1], -1)), stdr_glob], axis=1)
 
 
-def get_stderr(marker, y_t2d, int_t, x_sub):
+def get_stderr(marker, y_t4d, int_t, x_sub):
     ''' build tensor loping of all markers to obtain all standerros'''
-    return tf.map_fn(lambda mar: stderr_func(mar, marker, y_t2d, int_t), x_sub.T)
+    return tf.map_fn(lambda mar: stderr_func(mar, marker, y_t4d, int_t), x_sub.T)
 
 
 def get_f1(rss_env, r1_full, n_phe):
@@ -245,17 +245,17 @@ def get_f1(rss_env, r1_full, n_phe):
     return tf.divide(
         tf.subtract(
             rss_env, r1_full), tf.divide(
-            r1_full, (n_phe - 3)))
+            r1_full, (n_phe - 6)))
 
 def get_pval(f_dist, n_phe):
     '''get p values from f1 scores'''
-    return f.logsf(f_dist, 1, n_phe -3)
-    #return 1 - f.cdf(f_dist, 1, n_phe - 3)
+    return f.logsf(f_dist, 1, n_phe -6)
+    #return 1 - f.cdf(f_dist, 1, n_phe - 6)
 
 
-def get_r1_full(marker, y_t2d, int_t, x_sub):
+def get_r1_full(marker, y_t4d, int_t, x_sub):
     ''' build tensor for full model '''
-    return tf.map_fn(lambda mar: rss(mar, marker, y_t2d, int_t), x_sub.T)
+    return tf.map_fn(lambda mar: rss(mar, marker, y_t4d, int_t), x_sub.T)
 
 
 def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
@@ -308,15 +308,15 @@ def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
                     n_marker)
         config = tf.compat.v1.ConfigProto()
         sess = tf.compat.v1.Session(config=config)
-        y_t2d = tf.cast(tf.reshape(y_trans, (n_phe, -1)), dtype=tf.float64)
+        y_t4d = tf.cast(tf.reshape(y_trans, (n_phe, -1)), dtype=tf.float64)
       #  y_tensor =  tf.convert_to_tensor(y_trans,dtype = tf.float64)
-        stdr_glob = get_stderr(marker, y_t2d, int_t, x_sub)
+        stdr_glob = get_stderr(marker, y_t4d, int_t, x_sub)
         if isinstance(cof, int) == False:
             r1_full = tf.map_fn(
                 lambda mar: rss_cof(
-                    mar, marker, y_t2d, int_t, cof_t), x_sub.T)
+                    mar, marker, y_t4d, int_t, cof_t), x_sub.T)
         else:
-            r1_full = get_r1_full(marker, y_t2d, int_t, x_sub)
+            r1_full = get_r1_full(marker, y_t4d, int_t, x_sub)
         f_1 = get_f1(rss_env, r1_full, n_phe)
         if i == 0:
             output = sess.run(get_output(f_1, x_sub, stdr_glob))
