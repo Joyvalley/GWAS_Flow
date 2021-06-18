@@ -118,6 +118,14 @@ if PERM > 1:
         np.random.seed(my_seed)
         Y_perm = np.random.permutation(Y_)
         output = main.gwas(X, K, Y_perm, BATCH_SIZE, COF)
+        res = pd.DataFrame({
+        'chr': CHR_POS[:, 0],
+        'pos': CHR_POS[:, 1],
+        'pval': output[:, 0],
+        'mac': np.array(macs[macs >= MAC_MIN], dtype=np.int),
+        'eff_size': output[:, 1],
+        'SE': output[:, 2]})
+        res.to_csv(OUT_FILE.replace(".csv","_"+str(i)+".csv"), index=False)
         min_pval.append(np.min(output[:, 0]))
         print(
             "Elapsed time for permuatation",
