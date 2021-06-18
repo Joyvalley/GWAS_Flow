@@ -110,6 +110,7 @@ Flgas and options are
 -a , --mac_min : integer specifying the minimum minor allele count necessary for a marker to be included. Default a = 1
 -bs, --batch-size : integer specifying the number of markers processed at once. Default -bs 500000
 -p , --perm : perform n permutations
+--out_perm : output individual resulst of the permuation. Default False, enable with arbitary string (e.g. --out_perm yo)
 --plot : create manhattanplot 
 -o , --out : name of output file. Default -o results.csv  
 -h , --help : prints help and command line options
