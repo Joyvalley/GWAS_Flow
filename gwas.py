@@ -21,6 +21,7 @@ COF_FILE = 0
 COF = "nan"
 PLOT = False
 K_FILE = 'not_prov'
+OUT_PERM = False 
 
 
 for i in range(1, len(sys.argv), 2):
@@ -44,6 +45,8 @@ for i in range(1, len(sys.argv), 2):
         OUT_FILE = sys.argv[i + 1]
     elif sys.argv[i] == "--plot":
         PLOT = bool(sys.argv[i + 1])
+    elif sys.argv[i] == "--out_perm":
+        OUT_PERM = bool(sys.argv[i+1])
     elif sys.argv[i] == "-h" or sys.argv[i] == "--help":
         print("-x , --genotype :file containing marker information in csv or hdf5 format of size")
         print("-y , --phenotype: file container phenotype information in csv format")
@@ -60,6 +63,10 @@ for i in range(1, len(sys.argv), 2):
         print('''
         -p , --perm : single integer specifying the number of permutations. 
         Default 1 == no perm 
+        ''')
+        print('''
+        --out_perm : output the results of the individual permuations.
+        Default False
         ''')
         print("-o , --out : name of output file. Default -o results.csv  ")
         print("-h , --help : prints help and command line options")
@@ -118,15 +125,17 @@ if PERM > 1:
         np.random.seed(my_seed)
         Y_perm = np.random.permutation(Y_)
         output = main.gwas(X, K, Y_perm, BATCH_SIZE, COF)
-        res = pd.DataFrame({
-        'chr': CHR_POS[:, 0],
-        'pos': CHR_POS[:, 1],
-        'pval': output[:, 0],
-        'mac': np.array(macs[macs >= MAC_MIN], dtype=np.int),
-        'eff_size': output[:, 1],
-        'SE': output[:, 2]})
-        res.to_csv(OUT_FILE.replace(".csv","_"+str(i)+".csv"), index=False)
         min_pval.append(np.min(output[:, 0]))
+        if OUT_PERM:
+            res = pd.DataFrame({
+            'chr': CHR_POS[:, 0],
+            'pos': CHR_POS[:, 1],
+            'pval': output[:, 0],
+            'mac': np.array(macs[macs >= MAC_MIN], dtype=np.int),
+            'eff_size': output[:, 1],
+            'SE': output[:, 2]})
+            res.to_csv(OUT_FILE.replace(".csv","_"+str(i+1)+".csv"), index=False)
+       
         print(
             "Elapsed time for permuatation",
             i + 1, " with p_min", min_pval[i],
