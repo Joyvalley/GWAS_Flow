@@ -1,7 +1,8 @@
-FROM ubuntu:18.04
-
+FROM ubuntu:20.04
 
 LABEL maintainer="jan.freudenthal@uni-wuerzburg.de"
+
+ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt update 
 
@@ -9,8 +10,7 @@ RUN apt install --yes && \
     apt install --yes \
     	locales
 	
-RUN locale-gen en_GB.UTF-8
-
+RUN locale-gen en_US.UTF-8
 
 RUN apt install -y emacs git 
 RUN apt install -y wget bzip2 sudo 
@@ -22,7 +22,6 @@ USER ubuntu
 WORKDIR /home/ubuntu/
 RUN chmod a+rwx /home/ubuntu/
 
-
 #### change anaconda to miniconda 
 
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
@@ -33,19 +32,12 @@ ENV PATH /home/ubuntu/miniconda3/bin:$PATH
 
 # Updating Anaconda packages
 RUN conda update conda
-RUN conda install tensorflow==1.14
-RUN conda install scipy
-RUN conda install numpy
-RUN conda install pandas==1.1.3
-RUN conda install tbb
-RUN conda install tqdm==4.46.1
-RUN conda install attrs=19.3.0
-RUN conda install numba
-RUN pip install limix
-RUN conda install h5py
-RUN conda install -c conda-forge pandas-plink          
-RUN conda install -c conda-forge matplotlib 
 
+# Install python packages
+ADD gwas_flow_env.yaml .
+RUN conda env update -n base --file gwas_flow_env.yaml
+
+# Add scripts
 ADD gwas.py .
 ADD herit.py .
 ADD main.py .

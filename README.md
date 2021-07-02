@@ -58,9 +58,13 @@ For the installation with docker the only required software is docker itself.
 ```shell 
 git clone https://github.com/Joyvalley/GWAS_Flow.git 
 cd GWAS_Flow
-docker build  -t gwas_flow  docker
+docker build  -t gwas_flow .
 ```
 
+Then you can run GWAS_Flow using your user id and files in your current working directory like this:
+```
+docker run -u $UID:$GID -v $PWD:/data --rm gwas_flow -x gwas_sample_data/G_sample.csv -y gwas_sample_data/Y_sample.csv -k gwas_sample_data/K_sample.csv -o docker_out.csv
+```
 
 
 ### singularity
@@ -68,7 +72,7 @@ docker build  -t gwas_flow  docker
 ```shell 
 git clone https://github.com/Joyvalley/GWAS_Flow.git 
 
-docker build  -t gwas_flow docker
+docker build  -t gwas_flow .
 
 !! make sure to change /PATH/TO/FOLDER
 docker run -v /var/run/docker.sock:/var/run/docker.sock -v /PATH/TO/FOLDER:/output --privileged -t singularityware/docker2singularity:1.11 gwas_flow:latest

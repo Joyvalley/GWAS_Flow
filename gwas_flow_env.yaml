@@ -3,10 +3,10 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - matplotlib
-  - pandas
   - python==3.7.3
   - tensorflow==1.14
+  - matplotlib
+  - pandas==1.0.1
   - scipy
   - numpy
   - limix
