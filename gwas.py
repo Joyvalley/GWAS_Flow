@@ -84,7 +84,6 @@ start = time.time()
 X, K, Y_, markers, COF = main.load_and_prepare_data(
     X_FILE, Y_FILE, K_FILE, M_PHE, COF_FILE)
 
-
 # MAF filterin
 markers_used, X, macs = main.mac_filter(MAC_MIN, X, markers)
 

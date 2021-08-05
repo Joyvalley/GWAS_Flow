@@ -54,6 +54,12 @@ def load_and_prepare_data(x_file, y_file, k_file, m_phe, cof_file):
 
     acc_y = np.asarray(y_phe[['accession_id']]).flatten()
     acc_isec = [isec for isec in acc_x if isec in acc_y]
+    if(len(acc_isec)==0):
+        print("WARNING: accessions in X do not overlap with accessions in Y")
+        print("Accessions X:")
+        print(acc_x)
+        print("Accessions Y:")
+        print(acc_y)
 
     idx_acc = list(map(lambda itt: itt in acc_isec, acc_x))
     idy_acc = list(map(lambda itt: itt in acc_isec, acc_y))
