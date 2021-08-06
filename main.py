@@ -65,6 +65,12 @@ def load_and_prepare_data(x_file, y_file, k_file, m_phe, cof_file):
     idy_acc = list(map(lambda itt: itt in acc_isec, acc_y))
     if k_file != 'not_prov':
         idk_acc = list(map(lambda itt: itt in acc_isec, acc_k))
+        if(len(idk_acc)!=len(acc_isec)):
+            print("WARNING: not all accessions are in the kinship matrix")
+            print("Accessions X/Y:")
+            print(acc_isec)
+            print("Accessions K:")
+            print(acc_k)
     if cof_file != 0:
         cof = pd.read_csv(cof_file, index_col=0)
         idc = cof.index
