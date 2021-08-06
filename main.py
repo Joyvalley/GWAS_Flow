@@ -100,7 +100,10 @@ def load_and_prepare_data(x_file, y_file, k_file, m_phe, cof_file):
     elif type_x.lower() == 'plink':
         x_gen = np.asarray(bed.compute() / 2, dtype=np.float64)[:, idx_acc].T
         if k_file != 'not_prov':
-            k_1 = np.asarray(k['kinship'][:])[idk_acc, :]
+            k_1 = k
+            if 'kinship' in k:
+                k_1 = k['kinship'][:]
+            k_1 = np.asarray(k_1)[idk_acc, :]
             kin_vr = k_1[:, idk_acc]
             kin_vr = kin_vr[np.argsort(acc_x[idx_acc]), :]
             kin_vr = kin_vr[:, np.argsort(acc_x[idx_acc])]
