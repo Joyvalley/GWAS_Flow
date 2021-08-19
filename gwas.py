@@ -1,4 +1,9 @@
 ''' main script for gwas '''
+import warnings
+warnings.filterwarnings('ignore', category=DeprecationWarning)
+warnings.filterwarnings('ignore', category=FutureWarning)
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import sys
 import time
 import numpy as np
@@ -16,6 +21,7 @@ COF_FILE = 0
 COF = "nan"
 PLOT = False
 K_FILE = 'not_prov'
+OUT_PERM = False 
 
 
 for i in range(1, len(sys.argv), 2):
@@ -39,6 +45,8 @@ for i in range(1, len(sys.argv), 2):
         OUT_FILE = sys.argv[i + 1]
     elif sys.argv[i] == "--plot":
         PLOT = bool(sys.argv[i + 1])
+    elif sys.argv[i] == "--out_perm":
+        OUT_PERM = bool(sys.argv[i+1])
     elif sys.argv[i] == "-h" or sys.argv[i] == "--help":
         print("-x , --genotype :file containing marker information in csv or hdf5 format of size")
         print("-y , --phenotype: file container phenotype information in csv format")
@@ -56,6 +64,10 @@ for i in range(1, len(sys.argv), 2):
         -p , --perm : single integer specifying the number of permutations. 
         Default 1 == no perm 
         ''')
+        print('''
+        --out_perm : output the results of the individual permuations.
+        Default False
+        ''')
         print("-o , --out : name of output file. Default -o results.csv  ")
         print("-h , --help : prints help and command line options")
         print("--plot: creates manhattan plot")
@@ -71,7 +83,6 @@ start = time.time()
 
 X, K, Y_, markers, COF = main.load_and_prepare_data(
     X_FILE, Y_FILE, K_FILE, M_PHE, COF_FILE)
-
 
 # MAF filterin
 markers_used, X, macs = main.mac_filter(MAC_MIN, X, markers)
@@ -114,6 +125,16 @@ if PERM > 1:
         Y_perm = np.random.permutation(Y_)
         output = main.gwas(X, K, Y_perm, BATCH_SIZE, COF)
         min_pval.append(np.min(output[:, 0]))
+        if OUT_PERM:
+            res = pd.DataFrame({
+            'chr': CHR_POS[:, 0],
+            'pos': CHR_POS[:, 1],
+            'pval': output[:, 0],
+            'mac': np.array(macs[macs >= MAC_MIN], dtype=np.int),
+            'eff_size': output[:, 1],
+            'SE': output[:, 2]})
+            res.to_csv(OUT_FILE.replace(".csv","_"+str(i+1)+".csv"), index=False)
+       
         print(
             "Elapsed time for permuatation",
             i + 1, " with p_min", min_pval[i],

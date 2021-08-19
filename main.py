@@ -6,8 +6,6 @@ import tensorflow as tf
 from pandas_plink import read_plink
 import h5py
 import herit
-#import pickle
-
 
 
 def kinship(marker):
@@ -37,7 +35,7 @@ def load_and_prepare_data(x_file, y_file, k_file, m_phe, cof_file):
         x_gen = pd.read_csv(x_file, index_col=0)
         markers = x_gen.columns.values
         acc_x = x_gen.index
-        x_gen = np.asarray(x_gen, dtype=np.float32) / 2
+        x_gen = np.asarray(x_gen, dtype=np.float64) / 2
     elif type_x.lower() == 'plink':
         my_prefix = x_file.split(".")[0]
         (bim, fam, bed) = read_plink(my_prefix)
@@ -52,15 +50,27 @@ def load_and_prepare_data(x_file, y_file, k_file, m_phe, cof_file):
         elif type_k == 'csv':
             k = pd.read_csv(k_file, index_col=0)
             acc_k = k.index
-            k = np.array(k, dtype=np.float32)
+            k = np.array(k, dtype=np.float64)
 
     acc_y = np.asarray(y_phe[['accession_id']]).flatten()
     acc_isec = [isec for isec in acc_x if isec in acc_y]
+    if(len(acc_isec)==0):
+        print("WARNING: accessions in X do not overlap with accessions in Y")
+        print("Accessions X:")
+        print(acc_x)
+        print("Accessions Y:")
+        print(acc_y)
 
     idx_acc = list(map(lambda itt: itt in acc_isec, acc_x))
     idy_acc = list(map(lambda itt: itt in acc_isec, acc_y))
     if k_file != 'not_prov':
         idk_acc = list(map(lambda itt: itt in acc_isec, acc_k))
+        if(len(idk_acc)!=len(acc_isec)):
+            print("WARNING: not all accessions are in the kinship matrix")
+            print("Accessions X/Y:")
+            print(acc_isec)
+            print("Accessions K:")
+            print(acc_k)
     if cof_file != 0:
         cof = pd.read_csv(cof_file, index_col=0)
         idc = cof.index
@@ -76,10 +86,9 @@ def load_and_prepare_data(x_file, y_file, k_file, m_phe, cof_file):
     else:
         cof = 0
 
-    y_phe_ = np.asarray(y_phe.drop('accession_id', 1), dtype=np.float32)[idy_acc, :]
+    y_phe_ = np.asarray(y_phe.drop('accession_id', 1), dtype=np.float64)[idy_acc, :]
     if type_x in ('hdf5', 'h5py'):
-        x_gen = np.asarray(snp['snps'][0:(len(snp['snps']) + 1), ],
-                       dtype=np.float32)[:, idx_acc].T
+        x_gen = np.asarray(snp['snps'][:, np.where(idx_acc)[0]], np.float64).T
         x_gen = x_gen[np.argsort(acc_x[idx_acc]), :]
         if k_file != 'not_prov':
             k_1 = np.asarray(k['kinship'][:])[idk_acc, :]
@@ -89,9 +98,12 @@ def load_and_prepare_data(x_file, y_file, k_file, m_phe, cof_file):
         else:
             kin_vr = kinship(x_gen)
     elif type_x.lower() == 'plink':
-        x_gen = np.asarray(bed.compute() / 2, dtype=np.float32)[:, idx_acc].T
+        x_gen = np.asarray(bed.compute() / 2, dtype=np.float64)[:, idx_acc].T
         if k_file != 'not_prov':
-            k_1 = np.asarray(k['kinship'][:])[idk_acc, :]
+            k_1 = k
+            if 'kinship' in k:
+                k_1 = k['kinship'][:]
+            k_1 = np.asarray(k_1)[idk_acc, :]
             kin_vr = k_1[:, idk_acc]
             kin_vr = kin_vr[np.argsort(acc_x[idx_acc]), :]
             kin_vr = kin_vr[:, np.argsort(acc_x[idx_acc])]
@@ -201,12 +213,12 @@ def transform_kinship(v_g, k_stand, v_e):
                 k_stand +
                 v_e *
                 np.identity(n_phe)))).astype(
-        np.float32)
+        np.float64)
 
 
 def transform_y(marker, y_phe):
     ''' transform phenotypes '''
-    return np.sum(np.multiply(np.transpose(marker), y_phe), axis=1).astype(np.float32)
+    return np.sum(np.multiply(np.transpose(marker), y_phe), axis=1).astype(np.float64)
 
 
 def transform_int(marker):
@@ -217,19 +229,19 @@ def transform_int(marker):
             np.transpose(marker),
             np.ones(n_phe)),
         axis=1).astype(
-            np.float32)
+            np.float64)
 
 
 def emmax(int_t, y_trans):
     ''' run emmax according to Kang et al 2010'''
     n_phe= len(int_t)
     return (np.linalg.lstsq(np.reshape(int_t, (n_phe, -1)),
-                            np.reshape(y_trans, (n_phe, -1)), rcond=None)[1]).astype(np.float32)
+                            np.reshape(y_trans, (n_phe, -1)), rcond=None)[1]).astype(np.float64)
 
 
 def transform_cof(marker, cof):
     ''' transform the coefficients '''
-    return np.sum(np.multiply(np.transpose(marker), cof), axis=1).astype(np.float32)
+    return np.sum(np.multiply(np.transpose(marker), cof), axis=1).astype(np.float64)
 
 
 
@@ -252,7 +264,8 @@ def get_f1(rss_env, r1_full, n_phe):
 
 def get_pval(f_dist, n_phe):
     '''get p values from f1 scores'''
-    return 1 - f.cdf(f_dist, 1, n_phe - 3)
+    return f.logsf(f_dist, 1, n_phe -3)
+    #return 1 - f.cdf(f_dist, 1, n_phe - 3)
 
 
 def get_r1_full(marker, y_t2d, int_t, x_sub):
@@ -310,8 +323,8 @@ def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
                     n_marker)
         config = tf.compat.v1.ConfigProto()
         sess = tf.compat.v1.Session(config=config)
-        y_t2d = tf.cast(tf.reshape(y_trans, (n_phe, -1)), dtype=tf.float32)
-      #  y_tensor =  tf.convert_to_tensor(y_trans,dtype = tf.float32)
+        y_t2d = tf.cast(tf.reshape(y_trans, (n_phe, -1)), dtype=tf.float64)
+      #  y_tensor =  tf.convert_to_tensor(y_trans,dtype = tf.float64)
         stdr_glob = get_stderr(marker, y_t2d, int_t, x_sub)
         if isinstance(cof, int) == False:
             r1_full = tf.map_fn(
@@ -327,7 +340,7 @@ def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
             output = np.append(output, tmp, axis=0)
         sess.close()
         f_dist = output[:, 0]
-    pval = get_pval(f_dist, n_phe)
+    pval = np.exp(get_pval(f_dist, n_phe))
     output[:, 0] = pval
   #  with open("test_data/cof_output", 'wb') as f: pickle.dump(output, f)
     return output
