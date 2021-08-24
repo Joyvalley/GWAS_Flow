@@ -1,4 +1,4 @@
-name: gwas_flow_test5
+name: gwas_flow
 channels:
   - conda-forge
   - defaults
