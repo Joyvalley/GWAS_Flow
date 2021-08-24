@@ -15,13 +15,13 @@ jobs:
         python-version: 3.7
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install pylint
-        pip install tensorflow==1.14
-        pip install numpy==1.16.4
-        pip install pandas==1.0.1
-        pip install limix==3.0.0
-        pip install scipy==1.2.1
+        python -m pip -q install --upgrade pip
+        pip -q install pylint
+        pip -q install tensorflow==1.14
+        pip -q install numpy==1.20
+        pip -q install pandas==1.0.1
+        pip -q install limix==3.0
+        pip -q install scipy==1.7
     - name: Analysing the code with pylint
       run: |
         pylint --fail-under=8.0 `ls -R|grep .py$|grep -v h5py | xargs`

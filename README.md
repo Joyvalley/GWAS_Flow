@@ -46,9 +46,11 @@ git clone https://github.com/Joyvalley/GWAS_Flow
 create an anaconda environment and install the necessary packages using the gwas_flow_env.yaml configuration file
 
 ```shell
-conda env create -f gwas_flow_env.yaml
+###  optional: 
+conda env create gwas_flow
 conda activate gwas_flow
-
+### set up environment with pip 
+pip install -r requirements.txt
 
 ```
 
