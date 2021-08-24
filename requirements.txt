@@ -1,0 +1,6 @@
+pylint
+tensorflow==1.14
+numpy==1.20
+pandas==1.0.1
+limix==3.0
+scipy==1.7
