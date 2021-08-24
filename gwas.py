@@ -1,27 +1,27 @@
 ''' main script for gwas '''
+import src.main as main
+import h5py as h5
+import pandas as pd
+import numpy as np
+import time
+import sys
+import os
 import warnings
 warnings.filterwarnings('ignore', category=DeprecationWarning)
 warnings.filterwarnings('ignore', category=FutureWarning)
-import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-import sys
-import time
-import numpy as np
-import pandas as pd
-import h5py as h5
-import main
 
 # set defaults
 BATCH_SIZE = 500000
 OUT_FILE = "results.csv"
-M_PHE  = 'phenotype_value'
+M_PHE = 'phenotype_value'
 PERM = 1
 MAC_MIN = 1
 COF_FILE = 0
 COF = "nan"
 PLOT = False
 K_FILE = 'not_prov'
-OUT_PERM = False 
+OUT_PERM = False
 
 
 for i in range(1, len(sys.argv), 2):
@@ -127,18 +127,19 @@ if PERM > 1:
         min_pval.append(np.min(output[:, 0]))
         if OUT_PERM:
             res = pd.DataFrame({
-            'chr': CHR_POS[:, 0],
-            'pos': CHR_POS[:, 1],
-            'pval': output[:, 0],
-            'mac': np.array(macs[macs >= MAC_MIN], dtype=np.int),
-            'eff_size': output[:, 1],
-            'SE': output[:, 2]})
-            res.to_csv(OUT_FILE.replace(".csv","_"+str(i+1)+".csv"), index=False)
-       
+                'chr': CHR_POS[:, 0],
+                'pos': CHR_POS[:, 1],
+                'pval': output[:, 0],
+                'mac': np.array(macs[macs >= MAC_MIN], dtype=np.int),
+                'eff_size': output[:, 1],
+                'SE': output[:, 2]})
+            res.to_csv(OUT_FILE.replace(
+                ".csv", "_"+str(i+1)+".csv"), index=False)
+
         print(
             "Elapsed time for permuatation",
             i + 1, " with p_min", min_pval[i],
-            " is",": ", round(
+            " is", ": ", round(
                 time.time() -
                 start_perm,
                 2))
@@ -151,7 +152,7 @@ if PERM > 1:
 
 
 if PLOT:
-    import plot
+    import src.plot as plot
     plot.manhattan(OUT_FILE, PERM)
 
 

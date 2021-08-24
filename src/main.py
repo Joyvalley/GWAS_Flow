@@ -5,7 +5,7 @@ from scipy.stats import f
 import tensorflow as tf
 from pandas_plink import read_plink
 import h5py
-import herit
+import src.herit as herit
 
 
 def kinship(marker):
