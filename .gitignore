@@ -7,3 +7,7 @@ perm_results.csv
 __*
 .R*
 .vs*
+.sc*
+.pytest_cache
+.sonar*
+
