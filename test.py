@@ -1,24 +1,26 @@
 ''' Test functions for gwas '''
+import numpy as np
+import main
+import pickle
+import unittest
+import os
 import warnings
 warnings.filterwarnings('ignore', category=DeprecationWarning)
 warnings.filterwarnings('ignore', category=FutureWarning)
-import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-import unittest
-import pickle
-import numpy as np
-import main
 
 
 class TestGwas(unittest.TestCase):
     ''' class containing tests for gwas'''
+
     def test_kinship(self):
         ''' testing the kinship function '''
         with open('test_data/K_test', 'rb') as k_file:
             kin_mat = pickle.load(k_file)
         with open('test_data/M_test', 'rb') as m_file:
             markers = pickle.load(m_file)
-        self.assertIsNone(np.testing.assert_array_equal(main.kinship(markers), kin_mat))
+        self.assertIsNone(np.testing.assert_array_equal(
+            main.kinship(markers), kin_mat))
 
     def test_gwas(self):
         ''' tests for the gwas function '''
@@ -35,16 +37,24 @@ class TestGwas(unittest.TestCase):
         with open('test_data/cof_output', 'rb') as coutput:
             cof_output = pickle.load(coutput)
         batch_size = 500000
-        print(output)
+     #   print(output)
+     #   print(output.dtype)
+        output = np.float64(output)
+        x_gen = np.float64(x_gen)
+        kin_mat = np.float64(kin_mat)
+        y_pheno = np.float64(y_pheno)
+
+     #   print(output)
+        print(output.dtype)
+        result = main.gwas(
+            x_gen,
+            kin_mat,
+            y_pheno,
+            batch_size,
+            cof=0)
+        print(result)
         self.assertIsNone(
-            np.testing.assert_array_almost_equal(
-                main.gwas(
-                    x_gen,
-                    kin_mat,
-                    y_pheno,
-                    batch_size,
-                    cof=0),
-                output))
+            np.testing.assert_array_almost_equal(result, output))
         print(output)
         self.assertIsNone(
             np.testing.assert_array_almost_equal(

@@ -13,8 +13,8 @@ def kinship(marker):
     n_phe = marker.shape[0]
     n_mar = marker.shape[1]
     mafs = np.sum(marker, axis=0) / n_phe
-    p_mat  = np.repeat(mafs, n_phe).reshape(n_phe, n_mar, order="F")
-    z_mat  = marker - p_mat
+    p_mat = np.repeat(mafs, n_phe).reshape(n_phe, n_mar, order="F")
+    z_mat = marker - p_mat
     kin_vr = (np.matmul(z_mat, z_mat.T)) / (2 * np.sum(mafs * (1 - mafs)))
     return kin_vr
 
@@ -26,7 +26,8 @@ def load_and_prepare_data(x_file, y_file, k_file, m_phe, cof_file):
     type_x = x_file.split(".")[-1]
     y_phe = pd.read_csv(y_file, engine='python').sort_values(
         ['accession_id']).groupby('accession_id').mean()
-    y_phe = pd.DataFrame({'accession_id': y_phe.index, 'phenotype_value': y_phe[m_phe]})
+    y_phe = pd.DataFrame({'accession_id': y_phe.index,
+                         'phenotype_value': y_phe[m_phe]})
     if type_x in ('hdf5',  'h5py'):
         snp = h5py.File(x_file, 'r')
         markers = np.asarray(snp['positions'])
@@ -54,7 +55,7 @@ def load_and_prepare_data(x_file, y_file, k_file, m_phe, cof_file):
 
     acc_y = np.asarray(y_phe[['accession_id']]).flatten()
     acc_isec = [isec for isec in acc_x if isec in acc_y]
-    if(len(acc_isec)==0):
+    if(len(acc_isec) == 0):
         print("WARNING: accessions in X do not overlap with accessions in Y")
         print("Accessions X:")
         print(acc_x)
@@ -65,7 +66,7 @@ def load_and_prepare_data(x_file, y_file, k_file, m_phe, cof_file):
     idy_acc = list(map(lambda itt: itt in acc_isec, acc_y))
     if k_file != 'not_prov':
         idk_acc = list(map(lambda itt: itt in acc_isec, acc_k))
-        if len(idk_acc)!=len(acc_isec):
+        if len(idk_acc) != len(acc_isec):
             print("WARNING: not all accessions are in the kinship matrix")
             print("Accessions X/Y:")
             print(acc_isec)
@@ -86,7 +87,8 @@ def load_and_prepare_data(x_file, y_file, k_file, m_phe, cof_file):
     else:
         cof = 0
 
-    y_phe_ = np.asarray(y_phe.drop('accession_id', 1), dtype=np.float64)[idy_acc, :]
+    y_phe_ = np.asarray(y_phe.drop('accession_id', 1),
+                        dtype=np.float64)[idy_acc, :]
     if type_x in ('hdf5', 'h5py'):
         x_gen = np.asarray(snp['snps'][:, np.where(idx_acc)[0]], np.float64).T
         x_gen = x_gen[np.argsort(acc_x[idx_acc]), :]
@@ -132,9 +134,10 @@ def mac_filter(mac_min, x_gen, markers):
 
 # calculate betas and se of betas
 
+
 def stderr_func(itt, marker, y_t2d, int_t):
     '''returns standard errors for induvidual markers '''
-    n_phe= len(int_t)
+    n_phe = len(int_t)
     x = tf.stack(
         (int_t, tf.squeeze(
             tf.matmul(
@@ -170,7 +173,7 @@ def rss(itt, marker, y_t2d, int_t):
     lm_res = tf.linalg.lstsq(
         tf.transpose(
             tf.stack(
-                (int_t, x_t), axis=0),perm=None), y_t2d, l2_regularizer=0.0)
+                (int_t, x_t), axis=0), perm=None), y_t2d, l2_regularizer=0.0)
     lm_x = tf.concat((tf.squeeze(lm_res), x_t), axis=0)
     return tf.reduce_sum(tf.math.square(tf.math.subtract(tf.squeeze(y_t2d), tf.math.add(
         tf.math.multiply(lm_x[1], lm_x[2:]), tf.multiply(lm_x[0], int_t)))))
@@ -184,18 +187,17 @@ def rss_cof(itt, marker, y_t2d, int_t, cof_t):
     lm_res = tf.linalg.lstsq(
         tf.transpose(
             tf.stack(
-                (int_t, x_t, cof_t), axis=0),perm=None), y_t2d, l2_regularizer=0.0)
+                (int_t, x_t, cof_t), axis=0), perm=None), y_t2d, l2_regularizer=0.0)
     return tf.math.reduce_sum(tf.math.square(
         y_t2d - (lm_res[1] * x_t + lm_res[0] * int_t + lm_res[2] * cof_t)))
 
 
-
 def get_k_stand(kin_vr):
     ''' obtains the standardized kinship matrix'''
-    n_phe= kin_vr.shape[0]
-    return (n_phe- 1) / np.sum((np.identity(n_phe) -
+    n_phe = kin_vr.shape[0]
+    return (n_phe - 1) / np.sum((np.identity(n_phe) -
                                 np.ones((n_phe, n_phe)) / n_phe)
-                               * kin_vr) * kin_vr
+                                * kin_vr) * kin_vr
 
 
 def get_herit(y_phe, k_stand):
@@ -205,7 +207,7 @@ def get_herit(y_phe, k_stand):
 
 def transform_kinship(v_g, k_stand, v_e):
     ''' transform the kinship matrix with cholesky transformation '''
-    n_phe= k_stand.shape[0]
+    n_phe = k_stand.shape[0]
     return np.transpose(
         np.linalg.inv(
             np.linalg.cholesky(
@@ -223,7 +225,7 @@ def transform_y(marker, y_phe):
 
 def transform_int(marker):
     ''' transform the intercept'''
-    n_phe= marker.shape[0]
+    n_phe = marker.shape[0]
     return np.sum(
         np.multiply(
             np.transpose(marker),
@@ -234,7 +236,7 @@ def transform_int(marker):
 
 def emmax(int_t, y_trans):
     ''' run emmax according to Kang et al 2010'''
-    n_phe= len(int_t)
+    n_phe = len(int_t)
     return (np.linalg.lstsq(np.reshape(int_t, (n_phe, -1)),
                             np.reshape(y_trans, (n_phe, -1)), rcond=None)[1]).astype(np.float64)
 
@@ -242,7 +244,6 @@ def emmax(int_t, y_trans):
 def transform_cof(marker, cof):
     ''' transform the coefficients '''
     return np.sum(np.multiply(np.transpose(marker), cof), axis=1).astype(np.float64)
-
 
 
 def get_output(f_1, x_sub, stdr_glob):
@@ -262,10 +263,11 @@ def get_f1(rss_env, r1_full, n_phe):
             rss_env, r1_full), tf.divide(
             r1_full, (n_phe - 3)))
 
+
 def get_pval(f_dist, n_phe):
     '''get p values from f1 scores'''
-    return f.logsf(f_dist, 1, n_phe -3)
-    #return 1 - f.cdf(f_dist, 1, n_phe - 3)
+    return f.logsf(f_dist, 1, n_phe - 3)
+    # return 1 - f.cdf(f_dist, 1, n_phe - 3)
 
 
 def get_r1_full(marker, y_t2d, int_t, x_sub):
@@ -279,12 +281,13 @@ def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
 #        pickle.dump(cof, f)
     y_phe = y_phe.flatten()
     n_marker = x_gen.shape[1]
-    n_phe= len(y_phe)
+    n_phe = len(y_phe)
     # REML
     k_stand = get_k_stand(kin_vr)
     v_g, delta, v_e = get_herit(y_phe, k_stand)
     print(" Pseudo-heritability is ", v_g / (v_e + v_g + delta))
-    print(" Performing GWAS on ", n_phe, " phenotypes and ", n_marker, "markers")
+    print(" Performing GWAS on ", n_phe,
+          " phenotypes and ", n_marker, "markers")
     # Transform kinship-matrix, phenotypes and estimate intercpt
    #  Xo = np.ones(K.shape[0]).flatten()
     marker = transform_kinship(v_g, k_stand, v_e)
