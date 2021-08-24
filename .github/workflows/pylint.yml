@@ -25,3 +25,6 @@ jobs:
     - name: Analysing the code with pylint
       run: |
         pylint --fail-under=8.0 `ls -R|grep .py$|grep -v h5py | xargs`
+    - name: Testing code with unittest
+      run: |
+        python -m unittest test.py
