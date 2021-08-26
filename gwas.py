@@ -4,7 +4,7 @@ warnings.filterwarnings('ignore', category=DeprecationWarning)
 warnings.filterwarnings('ignore', category=FutureWarning)
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-import src.main as main
+from gwas_flow import main
 import h5py as h5
 import pandas as pd
 import numpy as np
