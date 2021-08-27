@@ -16,12 +16,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip -q install --upgrade pip
-        pip -q install pylint
-        pip -q install tensorflow==1.14
-        pip -q install numpy==1.20
-        pip -q install pandas==1.0.1
-        pip -q install limix==3.0
-        pip -q install scipy==1.7
+        pip -q install -r requirements.txt
     - name: Analysing the code with pylint
       run: |
         pylint --fail-under=8.0 `ls -R|grep .py$|grep -v h5py | xargs`
