@@ -34,14 +34,13 @@ ENV PATH /home/ubuntu/miniconda3/bin:$PATH
 RUN conda update conda
 
 # Install python packages
-ADD gwas_flow_env.yaml .
-RUN conda env update -n base --file gwas_flow_env.yaml
+ADD requirements.txt .
+RUN conda install python=3.7 pip
+RUN pip install -r requirements.txt
 
 # Add scripts
 ADD gwas.py .
-ADD herit.py .
-ADD main.py .
-ADD plot.py .
+ADD gwas_flow ./gwas_flow
 
 WORKDIR /data
 ENTRYPOINT ["python","-u","/home/ubuntu/gwas.py"]
