@@ -5,8 +5,7 @@ from scipy.stats import f
 import tensorflow as tf
 from pandas_plink import read_plink
 import h5py
-import src.herit as herit
-
+from .herit import estimate_variance_components
 
 def kinship(marker):
     ''' returns kinship matrix after vanRaden '''
@@ -202,7 +201,7 @@ def get_k_stand(kin_vr):
 
 def get_herit(y_phe, k_stand):
     ''' calculates the heritabilty'''
-    return herit.estimate(y_phe, "normal", k_stand, verbose=False)
+    return estimate_variance_components(y_phe, "normal", k_stand, verbose=False)
 
 
 def transform_kinship(v_g, k_stand, v_e):

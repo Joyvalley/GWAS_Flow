@@ -8,7 +8,7 @@ from limix.qtl._assert import assert_finite
 from limix._display import session_block, session_line
 
 
-def estimate(y_phe, lik, kin, marker_mat=None, verbose=True):
+def estimate_variance_components(y_phe, lik, kin, marker_mat=None, verbose=True):
     ''' estimate variance components '''
     lik = normalize_likelihood(lik)
     lik_name = lik[0]

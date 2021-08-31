@@ -1,15 +1,15 @@
 ''' main script for gwas '''
-import src.main as main
+import warnings
+warnings.filterwarnings('ignore', category=DeprecationWarning)
+warnings.filterwarnings('ignore', category=FutureWarning)
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+from gwas_flow import main
 import h5py as h5
 import pandas as pd
 import numpy as np
 import time
 import sys
-import os
-import warnings
-warnings.filterwarnings('ignore', category=DeprecationWarning)
-warnings.filterwarnings('ignore', category=FutureWarning)
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # set defaults
 BATCH_SIZE = 500000
@@ -46,7 +46,7 @@ for i in range(1, len(sys.argv), 2):
     elif sys.argv[i] == "--plot":
         PLOT = bool(sys.argv[i + 1])
     elif sys.argv[i] == "--out_perm":
-        OUT_PERM = bool(sys.argv[i+1])
+        OUT_PERM = bool(sys.argv[i + 1])
     elif sys.argv[i] == "-h" or sys.argv[i] == "--help":
         print("-x , --genotype :file containing marker information in csv or hdf5 format of size")
         print("-y , --phenotype: file container phenotype information in csv format")
@@ -134,7 +134,7 @@ if PERM > 1:
                 'eff_size': output[:, 1],
                 'SE': output[:, 2]})
             res.to_csv(OUT_FILE.replace(
-                ".csv", "_"+str(i+1)+".csv"), index=False)
+                ".csv", "_" + str(i + 1) + ".csv"), index=False)
 
         print(
             "Elapsed time for permuatation",
