@@ -152,7 +152,7 @@ if PERM > 1:
 
 
 if PLOT:
-    import src.plot as plot
+    from gwas_flow import plot as plot
     plot.manhattan(OUT_FILE, PERM)
 
 
