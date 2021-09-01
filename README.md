@@ -183,7 +183,7 @@ All calculations have been performed on 16 i9 vCPUS and a NVIDIA Tesla P100 grap
 The unit tests can be run one the console with:
 
 ```shell 
-python -m unittest src/test.py
+python -m unittest tests/test.py
 ```
 
 All the necassary test data is stored in test_data
