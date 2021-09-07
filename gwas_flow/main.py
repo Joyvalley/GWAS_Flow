@@ -7,6 +7,7 @@ from pandas_plink import read_plink
 import h5py
 from .herit import estimate_variance_components
 
+
 def kinship(marker):
     ''' returns kinship matrix after vanRaden '''
     n_phe = marker.shape[0]
@@ -27,7 +28,7 @@ def load_and_prepare_data(x_file, y_file, k_file, m_phe, cof_file):
         ['accession_id']).groupby('accession_id').mean()
     y_phe = pd.DataFrame({'accession_id': y_phe.index,
                          'phenotype_value': y_phe[m_phe]})
-    if type_x in ('hdf5',  'h5py'):
+    if type_x in ('hdf5', 'h5py'):
         snp = h5py.File(x_file, 'r')
         markers = np.asarray(snp['positions'])
         acc_x = np.asarray(snp['accessions'][:], dtype=np.int)
@@ -39,7 +40,7 @@ def load_and_prepare_data(x_file, y_file, k_file, m_phe, cof_file):
     elif type_x.lower() == 'plink':
         my_prefix = x_file.split(".")[0]
         (bim, fam, bed) = read_plink(my_prefix)
-        acc_x = np.array(fam[['fid']], dtype=np.int).flatten()
+        acc_x = np.array(fam[['fid']], dtype=np.str).flatten()
         markers = np.array(bim[['snp']]).flatten()
     else:
         sys.exit("Only hdf5, h5py, plink and csv files are supported")
