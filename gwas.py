@@ -7,6 +7,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 from gwas_flow import main
 import h5py as h5
 import pandas as pd
+from pandas_plink import read_plink
 import numpy as np
 import time
 import sys
@@ -94,8 +95,11 @@ output = main.gwas(X, K, Y_, BATCH_SIZE, COF)
 if X_FILE.split(".")[-1] == 'csv':
     CHR_POS = np.array(list(map(lambda x: x.split("- "), markers_used)))
 elif X_FILE.split(".")[-1].lower() == 'plink':
-    my_chr = [i.split("r")[1] for i in [i.split("_")[0] for i in markers_used]]
-    my_pos = [i.split("_")[1] for i in markers_used]
+    my_prefix = X_FILE.split(".")[0]
+    (bim, fam, bed) = read_plink(my_prefix)
+    bim.set_index("snp", inplace=True)
+    my_chr = bim.loc[markers_used, "chrom"]
+    my_pos = bim.loc[markers_used, "pos"]
     CHR_POS = np.vstack((my_chr, my_pos)).T
 else:
     chr_reg = h5.File(X_FILE, 'r')['positions'].attrs['chr_regions']
