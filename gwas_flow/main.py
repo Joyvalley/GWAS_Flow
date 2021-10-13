@@ -267,7 +267,6 @@ def get_f1(rss_env, r1_full, n_phe):
 def get_pval(f_dist, n_phe):
     '''get p values from f1 scores'''
     return f.logsf(f_dist, 1, n_phe - 3)
-    # return 1 - f.cdf(f_dist, 1, n_phe - 3)
 
 
 def get_r1_full(marker, y_t2d, int_t, x_sub):
@@ -277,8 +276,6 @@ def get_r1_full(marker, y_t2d, int_t, x_sub):
 
 def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
     ''' get gwas results, calls all the subfunctions '''
-#    with open("test_data/cof_test", 'wb') as f:
-#        pickle.dump(cof, f)
     y_phe = y_phe.flatten()
     n_marker = x_gen.shape[1]
     n_phe = len(y_phe)
@@ -300,7 +297,6 @@ def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
     rss_env = emmax(int_t, y_trans)
     # loop over th batches
     for i in range(int(np.ceil(n_marker / batch_size))):
-       # tf.compat.v1.reset_default_graph()
         if n_marker < batch_size:
             x_sub = x_gen
         else:
@@ -324,8 +320,6 @@ def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
                     n_marker,
                     " of ",
                     n_marker)
-        #config = tf.compat.v1.ConfigProto()
-        #sess = tf.compat.v1.Session(config=config)
         y_t2d = tf.cast(tf.reshape(y_trans, (n_phe, -1)), dtype=tf.float64)
      
         stdr_glob = get_stderr(marker, y_t2d, int_t, x_sub)
@@ -341,11 +335,8 @@ def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
         else:
             tmp = get_output(f_1, x_sub, stdr_glob)
             output = np.append(output, tmp, axis=0)
-        #sess.close()
         f_dist = output[:, 0]
     pval = np.exp(get_pval(f_dist, n_phe))
     pval = tf.expand_dims(pval,-1)
     output = tf.concat([output,pval],1)
-    print (output)
-  #  with open("test_data/cof_output", 'wb') as f: pickle.dump(output, f)
     return output
