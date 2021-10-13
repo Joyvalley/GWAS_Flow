@@ -1,7 +1,6 @@
 pylint
 tensorflow
 numpy
-# due to limix requirements pandas needs to be fixed to 1.0.5
-pandas==1.0.5
+pandas
 limix
 scipy
