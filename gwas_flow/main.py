@@ -344,6 +344,8 @@ def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
         #sess.close()
         f_dist = output[:, 0]
     pval = np.exp(get_pval(f_dist, n_phe))
-    output[:, 0] = pval
+    pval = tf.expand_dims(pval,-1)
+    output = tf.concat([output,pval],1)
+    print (output)
   #  with open("test_data/cof_output", 'wb') as f: pickle.dump(output, f)
     return output

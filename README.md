@@ -16,16 +16,16 @@ Here we use TensorFlow a framework that is commonly used for machine learning ap
 ## Requirements
 
 ### Required Software
-- [python](https://www.python.org/ "Python programming language") (v.3.7.3)
+- [python](https://www.python.org/ "Python programming language") (v.3.9)
 - [anaconda](https://www.anaconda.com/ "Anaconda virtual environments")
 - [git](https://git-scm.com/)
 
 ### Required python packages
-- [tensorflow](https://www.tensorflow.org/ "tensorflow") (v.1.14.0)
-- [numpy](https://numpy.org/ "numerical python") (v.1.16.4)
-- [pandas](https://pandas.pydata.org/ "import and manipulate data frames")(v.24.2)
-- [scipy](https://www.scipy.org/ "scientific python") (v.1.3.0)
-- [h5py](https://www.h5py.org/ "import and manipulated hdf files") (v.2.9.0)
+- [tensorflow](https://www.tensorflow.org/ "tensorflow") (v.2.6.0)
+- [numpy](https://numpy.org/ "numerical python")
+- [pandas](https://pandas.pydata.org/ "import and manipulate data frames")(v.1.0.5)
+- [scipy](https://www.scipy.org/ "scientific python")
+- [h5py](https://www.h5py.org/ "import and manipulated hdf files") 
 - [matplotlib](https://matplotlib.org/ "plot library for python")
 
 ### Docker and Singularity
@@ -47,7 +47,7 @@ create an anaconda environment and install the necessary packages using the gwas
 
 ```shell
 ###  optional: 
-conda env create gwas_flow
+conda create -n gwas_flow python==3.9 pip
 conda activate gwas_flow
 ### set up environment with pip 
 pip install -r requirements.txt
