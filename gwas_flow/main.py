@@ -202,7 +202,7 @@ def get_k_stand(kin_vr):
 
 def get_herit(y_phe, k_stand):
     ''' calculates the heritabilty'''
-    return estimate_variance_components(y_phe, "normal", k_stand, verbose=False)
+    return estimate_variance_components(y_phe, k_stand, verbose=False)
 
 
 def transform_kinship(v_g, k_stand, v_e):
@@ -281,8 +281,8 @@ def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
     n_phe = len(y_phe)
     # REML
     k_stand = get_k_stand(kin_vr)
-    v_g, delta, v_e = get_herit(y_phe, k_stand)
-    print(" Pseudo-heritability is ", v_g / (v_e + v_g + delta))
+    v_g, v_e = get_herit(y_phe, k_stand)
+    print(" Pseudo-heritability is ", v_g / (v_e + v_g))
     print(" Performing GWAS on ", n_phe,
           " phenotypes and ", n_marker, "markers")
     # Transform kinship-matrix, phenotypes and estimate intercpt
