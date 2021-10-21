@@ -17,7 +17,6 @@ jobs:
       run: |
         python -m pip -q install --upgrade pip
         pip -q install -r requirements.txt
-        pip install pandas==1.0.5
     - name: Analysing the code with pylint
       run: |
         pylint --fail-under=8.0 `ls -R|grep .py$|grep -v h5py | xargs`
