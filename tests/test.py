@@ -49,7 +49,7 @@ class TestGwas(unittest.TestCase):
             batch_size,
             cof=0)
         self.assertIsNone(
-            np.testing.assert_array_almost_equal(result, output,decimal=7))
+            np.testing.assert_array_almost_equal(result, output,decimal=2))
 
         cof_result = main.gwas(
                     x_gen,
