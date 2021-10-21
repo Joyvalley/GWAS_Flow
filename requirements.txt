@@ -2,5 +2,6 @@ pylint
 tensorflow
 numpy
 pandas
+pandas-plink
 glimix-core
 scipy
