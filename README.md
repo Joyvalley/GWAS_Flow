@@ -26,8 +26,9 @@ Here we use TensorFlow a framework that is commonly used for machine learning ap
 - [scipy](https://www.scipy.org/ "scientific python")
 - [h5py](https://www.h5py.org/ "import and manipulated hdf files") 
 - [matplotlib](https://matplotlib.org/ "plot library for python")
-# This is due to a dependency in Limix 
-- [pandas](https://pandas.pydata.org/ "import and manipulate data frames")(v.1.0.5)
+- [pandas](https://pandas.pydata.org/ "import and manipulate data frames")
+- [glimix-core]
+- [pandas-plink]
 
 ### Docker and Singularity
 - [Docker](https://www.docker.com/) (v.19.03.1)
@@ -52,7 +53,7 @@ conda create -n gwas_flow python==3.9 pip
 conda activate gwas_flow
 ### set up environment with pip 
 pip install -r requirements.txt
-pip install pandas==1.0.5 
+
 
 ```
 
