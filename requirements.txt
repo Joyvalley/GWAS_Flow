@@ -2,5 +2,5 @@ pylint
 tensorflow
 numpy
 pandas
-limix
+glimix-core
 scipy
