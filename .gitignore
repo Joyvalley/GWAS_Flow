@@ -4,7 +4,7 @@
 #*
 results.csv
 perm_results.csv
-__*
+__pycache__*
 .R*
 .vs*
 .sc*
