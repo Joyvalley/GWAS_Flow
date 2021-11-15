@@ -202,7 +202,7 @@ def get_k_stand(kin_vr):
 
 def get_herit(y_phe, k_stand):
     ''' calculates the heritabilty'''
-    return estimate_variance_components(y_phe, "normal", k_stand, verbose=False)
+    return estimate_variance_components(y_phe, k_stand, verbose=False)
 
 
 def transform_kinship(v_g, k_stand, v_e):
@@ -267,7 +267,6 @@ def get_f1(rss_env, r1_full, n_phe):
 def get_pval(f_dist, n_phe):
     '''get p values from f1 scores'''
     return f.logsf(f_dist, 1, n_phe - 3)
-    # return 1 - f.cdf(f_dist, 1, n_phe - 3)
 
 
 def get_r1_full(marker, y_t2d, int_t, x_sub):
@@ -277,15 +276,13 @@ def get_r1_full(marker, y_t2d, int_t, x_sub):
 
 def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
     ''' get gwas results, calls all the subfunctions '''
-#    with open("test_data/cof_test", 'wb') as f:
-#        pickle.dump(cof, f)
     y_phe = y_phe.flatten()
     n_marker = x_gen.shape[1]
     n_phe = len(y_phe)
     # REML
     k_stand = get_k_stand(kin_vr)
-    v_g, delta, v_e = get_herit(y_phe, k_stand)
-    print(" Pseudo-heritability is ", v_g / (v_e + v_g + delta))
+    v_g, v_e = get_herit(y_phe, k_stand)
+    print(" Pseudo-heritability is ", v_g / (v_e + v_g))
     print(" Performing GWAS on ", n_phe,
           " phenotypes and ", n_marker, "markers")
     # Transform kinship-matrix, phenotypes and estimate intercpt
@@ -300,7 +297,6 @@ def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
     rss_env = emmax(int_t, y_trans)
     # loop over th batches
     for i in range(int(np.ceil(n_marker / batch_size))):
-        tf.compat.v1.reset_default_graph()
         if n_marker < batch_size:
             x_sub = x_gen
         else:
@@ -324,10 +320,8 @@ def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
                     n_marker,
                     " of ",
                     n_marker)
-        config = tf.compat.v1.ConfigProto()
-        sess = tf.compat.v1.Session(config=config)
         y_t2d = tf.cast(tf.reshape(y_trans, (n_phe, -1)), dtype=tf.float64)
-      #  y_tensor =  tf.convert_to_tensor(y_trans,dtype = tf.float64)
+     
         stdr_glob = get_stderr(marker, y_t2d, int_t, x_sub)
         if isinstance(cof, int) == False:
             r1_full = tf.map_fn(
@@ -337,13 +331,12 @@ def gwas(x_gen, kin_vr, y_phe, batch_size, cof):
             r1_full = get_r1_full(marker, y_t2d, int_t, x_sub)
         f_1 = get_f1(rss_env, r1_full, n_phe)
         if i == 0:
-            output = sess.run(get_output(f_1, x_sub, stdr_glob))
+            output = get_output(f_1, x_sub, stdr_glob)
         else:
-            tmp = sess.run(get_output(f_1, x_sub, stdr_glob))
+            tmp = get_output(f_1, x_sub, stdr_glob)
             output = np.append(output, tmp, axis=0)
-        sess.close()
         f_dist = output[:, 0]
     pval = np.exp(get_pval(f_dist, n_phe))
-    output[:, 0] = pval
-  #  with open("test_data/cof_output", 'wb') as f: pickle.dump(output, f)
+    pval = tf.expand_dims(pval,-1)
+    output = tf.concat([output,pval],1)
     return output

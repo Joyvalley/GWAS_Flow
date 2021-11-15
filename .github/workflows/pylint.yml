@@ -9,14 +9,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.7
+    - name: Set up Python 3.9
       uses: actions/setup-python@v1
       with:
-        python-version: 3.7
+        python-version: 3.9
     - name: Install dependencies
       run: |
         python -m pip -q install --upgrade pip
-        pip -q install -r requirements.txt
+        pip install -r requirements.txt
     - name: Analysing the code with pylint
       run: |
         pylint --fail-under=8.0 `ls -R|grep .py$|grep -v h5py | xargs`

@@ -110,7 +110,7 @@ else:
 res = pd.DataFrame({
     'chr': CHR_POS[:, 0],
     'pos': CHR_POS[:, 1],
-    'pval': output[:, 0],
+    'pval': output[:, 3],
     'mac': np.array(macs[macs >= MAC_MIN], dtype=np.int),
     'eff_size': output[:, 1],
     'SE': output[:, 2]})
