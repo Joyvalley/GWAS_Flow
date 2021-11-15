@@ -53,6 +53,8 @@ conda create -n gwas_flow python==3.9 pip
 conda activate gwas_flow
 ### set up environment with pip 
 pip install -r requirements.txt
+## because of different cuda versions it might be necessary to install the latest cudnn version on you GPU
+conda install -c conda-forge cudnn
 
 
 ```
