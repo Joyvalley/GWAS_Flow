@@ -1,5 +1,5 @@
 pylint
-tensorflow-cpu==1.15
+tensorflow-cpu==2.5.2
 numpy==1.20
 pandas==1.0.1
 limix==3.0
