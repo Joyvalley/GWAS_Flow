@@ -1,4 +1,5 @@
 ''' main script for gwas '''
+from pathlib import Path
 import warnings
 warnings.filterwarnings('ignore', category=DeprecationWarning)
 warnings.filterwarnings('ignore', category=FutureWarning)
@@ -118,7 +119,9 @@ if PERM > 1:
     perm_seeds = []
     my_time = []
     for i in range(PERM):
-        perm_out = 'perm_' + OUT_FILE
+        perm_out = Path(OUT_FILE).parent.joinpath(
+            'perm_' + Path(OUT_FILE).name)
+        print(perm_out)
         start_perm = time.time()
         print("Running permutation ", i + 1, " of ", PERM)
         my_seed = np.asscalar(np.random.randint(9999, size=1))

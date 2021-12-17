@@ -191,3 +191,4 @@ All the necassary test data is stored in test_data
 - drop co-factor support (`--cof` no longer works, see [#30](https://github.com/Joyvalley/GWAS_Flow/issues/30))
 - standard error is no longer reported in the output files ([#28](https://github.com/Joyvalley/GWAS_Flow/issues/28))
 - create plots in png and pdf format (related to [#16](https://github.com/Joyvalley/GWAS_Flow/issues/16))
+- fix bug with permutation output when a path was given with `--out` (rather than a filename, related to [#16](https://github.com/Joyvalley/GWAS_Flow/issues/16))

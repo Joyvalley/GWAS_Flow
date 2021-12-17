@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
+from pathlib import Path
 
 
 # functions to plot a simple manhattanplot which includes the bonferroni
@@ -44,11 +45,13 @@ def manhattan(res_name, perm):
             len(res)), xmin=0, xmax=np.max(
             res['BPcum']), linestyles="dashdot")
     if perm > 1:
-        perm_res = pd.read_csv('perm_' + res_name)
+        perm_res_name = Path(res_name).parent.joinpath(
+            'perm_' + Path(res_name).name)
+        perm_res = pd.read_csv(perm_res_name)
         perm_idx = round(perm / 20, 0)
         perm_threshold = perm_res['min_p'][perm_idx]
         my_axis.hlines(-np.log10(perm_threshold), xmin=0,
-                  xmax=np.max(res['BPcum']), linestyles="dashed")
+                       xmax=np.max(res['BPcum']), linestyles="dashed")
     for name, group in res_group:
         my_axis.plot(
             group.BPcum,
