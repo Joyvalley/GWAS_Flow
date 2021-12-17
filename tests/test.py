@@ -13,15 +13,6 @@ import unittest
 class TestGwas(unittest.TestCase):
     ''' class containing tests for gwas'''
 
-    def test_kinship(self):
-        ''' testing the kinship function '''
-        with open('test_data/K_test', 'rb') as k_file:
-            kin_mat = pickle.load(k_file)
-        with open('test_data/M_test', 'rb') as m_file:
-            markers = pickle.load(m_file)
-        self.assertIsNone(np.testing.assert_array_almost_equal(
-            main.kinship(markers), kin_mat))
-
     def test_gwas(self):
         ''' tests for the gwas function '''
         with open('test_data/X_test', 'rb') as g_file:
@@ -52,10 +43,10 @@ class TestGwas(unittest.TestCase):
             np.testing.assert_array_almost_equal(result, output))
 
         cof_result = main.gwas(
-                    x_gen,
-                    kin_mat,
-                    y_pheno,
-                    batch_size,
-                    cof)
+            x_gen,
+            kin_mat,
+            y_pheno,
+            batch_size,
+            cof)
         self.assertIsNone(
             np.testing.assert_array_almost_equal(cof_result, cof_output))
