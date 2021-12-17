@@ -21,7 +21,6 @@ MAC_MIN = 1
 COF_FILE = 0
 COF = "nan"
 PLOT = False
-K_FILE = 'not_prov'
 OUT_PERM = False
 
 

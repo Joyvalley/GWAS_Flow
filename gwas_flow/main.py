@@ -10,13 +10,8 @@ from .herit import estimate_variance_components
 
 def kinship(marker):
     ''' returns kinship matrix after vanRaden '''
-    n_phe = marker.shape[0]
-    n_mar = marker.shape[1]
-    mafs = np.sum(marker, axis=0) / n_phe
-    p_mat = np.repeat(mafs, n_phe).reshape(n_phe, n_mar, order="F")
-    z_mat = marker - p_mat
-    kin_vr = (np.matmul(z_mat, z_mat.T)) / (2 * np.sum(mafs * (1 - mafs)))
-    return kin_vr
+    # not implemented yet
+    raise NotImplementedError("No kins")
 
 
 def load_and_prepare_data(x_file, y_file, k_file, m_phe, cof_file):

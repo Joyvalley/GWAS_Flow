@@ -84,7 +84,8 @@ change the name of e.g. gwas_flow_latest-2019-08-19-8c98f492dd54.img to gwas_flo
 ## Execution with anaconda installation
 ### Input data 
 GWAS_Flow is designed to work with several different input data formats. For all of them there is are sample data avaialble in the folder gwas_sample_data/
-The minimal requirement is to provide a genotype and a phenotype file if no kinship matrix is provided a kinship matrix according to van Raden ist caluculated from the provided marker information. Depending on the size of the marker matrix this can take a while.
+The minimal requirement is to provide a genotype, phenotype and a kinship file.
+⚠️ In previous versions of GWAS_Flow (<= 1.1.2) a kinship matrix according to van Raden was caluculated from the provided marker information. There might have been an error in the implementation (see [[#27](https://github.com/Joyvalley/GWAS_Flow/issues/27)). Therefore, the recommendation to provide a kinship matrix was changed to a requirement.
 
 #### hdf5 input
 
