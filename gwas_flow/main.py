@@ -10,13 +10,8 @@ from .herit import estimate_variance_components
 
 def kinship(marker):
     ''' returns kinship matrix after vanRaden '''
-    n_phe = marker.shape[0]
-    n_mar = marker.shape[1]
-    mafs = np.sum(marker, axis=0) / n_phe
-    p_mat = np.repeat(mafs, n_phe).reshape(n_phe, n_mar, order="F")
-    z_mat = marker - p_mat
-    kin_vr = (np.matmul(z_mat, z_mat.T)) / (2 * np.sum(mafs * (1 - mafs)))
-    return kin_vr
+    # not implemented yet
+    raise NotImplementedError("No kins")
 
 
 def load_and_prepare_data(x_file, y_file, k_file, m_phe, cof_file):
@@ -261,13 +256,12 @@ def get_f1(rss_env, r1_full, n_phe):
     return tf.divide(
         tf.subtract(
             rss_env, r1_full), tf.divide(
-            r1_full, (n_phe - 3)))
+            r1_full, (n_phe - 2)))
 
 
 def get_pval(f_dist, n_phe):
     '''get p values from f1 scores'''
-    return f.logsf(f_dist, 1, n_phe - 3)
-    # return 1 - f.cdf(f_dist, 1, n_phe - 3)
+    return f.logsf(f_dist, 1, n_phe - 2)
 
 
 def get_r1_full(marker, y_t2d, int_t, x_sub):

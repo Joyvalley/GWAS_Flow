@@ -1,4 +1,5 @@
 ''' main script for gwas '''
+from pathlib import Path
 import warnings
 warnings.filterwarnings('ignore', category=DeprecationWarning)
 warnings.filterwarnings('ignore', category=FutureWarning)
@@ -21,15 +22,14 @@ MAC_MIN = 1
 COF_FILE = 0
 COF = "nan"
 PLOT = False
-K_FILE = 'not_prov'
 OUT_PERM = False
 
 
 for i in range(1, len(sys.argv), 2):
     if sys.argv[i] == "-x" or sys.argv[i] == "--genotype":
         X_FILE = sys.argv[i + 1]
-    elif sys.argv[i] == "--cof":
-        COF_FILE = sys.argv[i + 1]
+    # elif sys.argv[i] == "--cof":
+    #    COF_FILE = sys.argv[i + 1]
     elif sys.argv[i] == "-y" or sys.argv[i] == "--phenotype":
         Y_FILE = sys.argv[i + 1]
     elif sys.argv[i] == "-k" or sys.argv[i] == "--kinship":
@@ -112,15 +112,16 @@ res = pd.DataFrame({
     'pos': CHR_POS[:, 1],
     'pval': output[:, 0],
     'mac': np.array(macs[macs >= MAC_MIN], dtype=np.int),
-    'eff_size': output[:, 1],
-    'SE': output[:, 2]})
+    'eff_size': output[:, 1]})
 res.to_csv(OUT_FILE, index=False)
 if PERM > 1:
     min_pval = []
     perm_seeds = []
     my_time = []
     for i in range(PERM):
-        perm_out = 'perm_' + OUT_FILE
+        perm_out = Path(OUT_FILE).parent.joinpath(
+            'perm_' + Path(OUT_FILE).name)
+        print(perm_out)
         start_perm = time.time()
         print("Running permutation ", i + 1, " of ", PERM)
         my_seed = np.asscalar(np.random.randint(9999, size=1))
@@ -135,8 +136,7 @@ if PERM > 1:
                 'pos': CHR_POS[:, 1],
                 'pval': output[:, 0],
                 'mac': np.array(macs[macs >= MAC_MIN], dtype=np.int),
-                'eff_size': output[:, 1],
-                'SE': output[:, 2]})
+                'eff_size': output[:, 1]})
             res.to_csv(OUT_FILE.replace(
                 ".csv", "_" + str(i + 1) + ".csv"), index=False)
 

@@ -47,7 +47,7 @@ create an anaconda environment and install the necessary packages using the gwas
 
 ```shell
 ###  optional: 
-conda env create gwas_flow
+conda create -n gwas_flow
 conda activate gwas_flow
 ### set up environment with pip 
 pip install -r requirements.txt
@@ -84,7 +84,8 @@ change the name of e.g. gwas_flow_latest-2019-08-19-8c98f492dd54.img to gwas_flo
 ## Execution with anaconda installation
 ### Input data 
 GWAS_Flow is designed to work with several different input data formats. For all of them there is are sample data avaialble in the folder gwas_sample_data/
-The minimal requirement is to provide a genotype and a phenotype file if no kinship matrix is provided a kinship matrix according to van Raden ist caluculated from the provided marker information. Depending on the size of the marker matrix this can take a while.
+The minimal requirement is to provide a genotype, phenotype and a kinship file.
+⚠️ In previous versions of GWAS_Flow (<= 1.1.2) a kinship matrix according to van Raden was caluculated from the provided marker information. There might have been an error in the implementation (see [[#27](https://github.com/Joyvalley/GWAS_Flow/issues/27)). Therefore, the recommendation to provide a kinship matrix was changed to a requirement.
 
 #### hdf5 input
 
@@ -112,7 +113,6 @@ Flgas and options are
 -y , --phenotype : file container phenotype information in csv format
 -k , --kinship : file containing kinship matrix of size k X k in csv or hdf5 format
 -m : name of column to be used in phenotype file. Default m='phenotype_value' 
---cof: file with cofactor information (only one co-factor as of now)
 -a , --mac_min : integer specifying the minimum minor allele count necessary for a marker to be included. Default a = 1
 -bs, --batch-size : integer specifying the number of markers processed at once. Default -bs 500000
 -p , --perm : perform n permutations
@@ -148,12 +148,7 @@ singularity run  gwas_flow_sing.img -x gwas_sample_data/AT_geno.hdf5 -y gwas_sam
 
 ### further options 
 #### Co-factor
-So far GWAS-Flow is capable of using on co-factor the co-factor is added to the analysis with the flag `--cof FILENAME` 
-e.g 
-```shell
- python gwas.py -x gwas_sample_data/G_sample.csv -y gwas_sample_data/Y_sample.csv -k gwas_sample_data/K_sample.csv --cof gwas_sample_data/cof.csv 
-```
-
+Previous versions of GWAS_Flow (<= 1.1.2) had experimental support for one Co-Factor. This functionality was dropped in v1.2.0 (see [#30](https://github.com/Joyvalley/GWAS_Flow/issues/30)).
 
 #### Permutation
 add the flag `--perm 100` to calculate a significance threshold based on 100 permutations. Change 100 to any integer larger 2 to perform n permutations
@@ -187,3 +182,13 @@ python -m unittest tests/test.py
 ```
 
 All the necassary test data is stored in test_data
+
+## Changes
+
+### v1.2.0
+- providing a kinship matrix via `-k` is now required ([#27](https://github.com/Joyvalley/GWAS_Flow/issues/27))
+- fix degrees of freedom ([#29](https://github.com/Joyvalley/GWAS_Flow/issues/29))
+- drop co-factor support (`--cof` no longer works, see [#30](https://github.com/Joyvalley/GWAS_Flow/issues/30))
+- standard error is no longer reported in the output files ([#28](https://github.com/Joyvalley/GWAS_Flow/issues/28))
+- create plots in png and pdf format (related to [#16](https://github.com/Joyvalley/GWAS_Flow/issues/16))
+- fix bug with permutation output when a path was given with `--out` (rather than a filename, related to [#16](https://github.com/Joyvalley/GWAS_Flow/issues/16))
