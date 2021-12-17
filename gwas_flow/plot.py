@@ -60,3 +60,4 @@ def manhattan(res_name, perm):
     plt.xticks([])
     plt.legend()
     plt.savefig("manhattan.pdf")
+    plt.savefig("manhattan.png")

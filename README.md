@@ -47,7 +47,7 @@ create an anaconda environment and install the necessary packages using the gwas
 
 ```shell
 ###  optional: 
-conda env create gwas_flow
+conda create -n gwas_flow
 conda activate gwas_flow
 ### set up environment with pip 
 pip install -r requirements.txt
@@ -190,3 +190,4 @@ All the necassary test data is stored in test_data
 - fix degrees of freedom ([#29](https://github.com/Joyvalley/GWAS_Flow/issues/29))
 - drop co-factor support (`--cof` no longer works, see [#30](https://github.com/Joyvalley/GWAS_Flow/issues/30))
 - standard error is no longer reported in the output files ([#28](https://github.com/Joyvalley/GWAS_Flow/issues/28))
+- create plots in png and pdf format (related to [#16](https://github.com/Joyvalley/GWAS_Flow/issues/16))
