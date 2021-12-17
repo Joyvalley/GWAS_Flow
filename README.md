@@ -188,3 +188,9 @@ python -m unittest tests/test.py
 ```
 
 All the necassary test data is stored in test_data
+
+## Changes
+
+### v1.2.0
+- providing a kinship matrix via `-k` is now required ([#27](https://github.com/Joyvalley/GWAS_Flow/issues/27))
+- fix degrees of freedom ([#29](https://github.com/Joyvalley/GWAS_Flow/issues/29))
