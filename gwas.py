@@ -27,8 +27,8 @@ OUT_PERM = False
 for i in range(1, len(sys.argv), 2):
     if sys.argv[i] == "-x" or sys.argv[i] == "--genotype":
         X_FILE = sys.argv[i + 1]
-    elif sys.argv[i] == "--cof":
-        COF_FILE = sys.argv[i + 1]
+    # elif sys.argv[i] == "--cof":
+    #    COF_FILE = sys.argv[i + 1]
     elif sys.argv[i] == "-y" or sys.argv[i] == "--phenotype":
         Y_FILE = sys.argv[i + 1]
     elif sys.argv[i] == "-k" or sys.argv[i] == "--kinship":

@@ -113,7 +113,6 @@ Flgas and options are
 -y , --phenotype : file container phenotype information in csv format
 -k , --kinship : file containing kinship matrix of size k X k in csv or hdf5 format
 -m : name of column to be used in phenotype file. Default m='phenotype_value' 
---cof: file with cofactor information (only one co-factor as of now)
 -a , --mac_min : integer specifying the minimum minor allele count necessary for a marker to be included. Default a = 1
 -bs, --batch-size : integer specifying the number of markers processed at once. Default -bs 500000
 -p , --perm : perform n permutations
@@ -149,12 +148,7 @@ singularity run  gwas_flow_sing.img -x gwas_sample_data/AT_geno.hdf5 -y gwas_sam
 
 ### further options 
 #### Co-factor
-So far GWAS-Flow is capable of using on co-factor the co-factor is added to the analysis with the flag `--cof FILENAME` 
-e.g 
-```shell
- python gwas.py -x gwas_sample_data/G_sample.csv -y gwas_sample_data/Y_sample.csv -k gwas_sample_data/K_sample.csv --cof gwas_sample_data/cof.csv 
-```
-
+Previous versions of GWAS_Flow (<= 1.1.2) had experimental support for one Co-Factor. This functionality was dropped in v1.2.0 (see [#30](https://github.com/Joyvalley/GWAS_Flow/issues/30)).
 
 #### Permutation
 add the flag `--perm 100` to calculate a significance threshold based on 100 permutations. Change 100 to any integer larger 2 to perform n permutations
@@ -194,3 +188,4 @@ All the necassary test data is stored in test_data
 ### v1.2.0
 - providing a kinship matrix via `-k` is now required ([#27](https://github.com/Joyvalley/GWAS_Flow/issues/27))
 - fix degrees of freedom ([#29](https://github.com/Joyvalley/GWAS_Flow/issues/29))
+- drop co-factor support (`--cof` no longer works, see [#30](https://github.com/Joyvalley/GWAS_Flow/issues/30))
