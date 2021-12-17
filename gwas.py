@@ -111,8 +111,7 @@ res = pd.DataFrame({
     'pos': CHR_POS[:, 1],
     'pval': output[:, 0],
     'mac': np.array(macs[macs >= MAC_MIN], dtype=np.int),
-    'eff_size': output[:, 1],
-    'SE': output[:, 2]})
+    'eff_size': output[:, 1]})
 res.to_csv(OUT_FILE, index=False)
 if PERM > 1:
     min_pval = []
@@ -134,8 +133,7 @@ if PERM > 1:
                 'pos': CHR_POS[:, 1],
                 'pval': output[:, 0],
                 'mac': np.array(macs[macs >= MAC_MIN], dtype=np.int),
-                'eff_size': output[:, 1],
-                'SE': output[:, 2]})
+                'eff_size': output[:, 1]})
             res.to_csv(OUT_FILE.replace(
                 ".csv", "_" + str(i + 1) + ".csv"), index=False)
 

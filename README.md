@@ -189,3 +189,4 @@ All the necassary test data is stored in test_data
 - providing a kinship matrix via `-k` is now required ([#27](https://github.com/Joyvalley/GWAS_Flow/issues/27))
 - fix degrees of freedom ([#29](https://github.com/Joyvalley/GWAS_Flow/issues/29))
 - drop co-factor support (`--cof` no longer works, see [#30](https://github.com/Joyvalley/GWAS_Flow/issues/30))
+- standard error is no longer reported in the output files ([#28](https://github.com/Joyvalley/GWAS_Flow/issues/28))
