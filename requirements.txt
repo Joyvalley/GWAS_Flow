@@ -3,4 +3,4 @@ tensorflow-cpu==1.15
 numpy==1.20
 pandas==1.0.1
 limix==3.0
-scipy==1.7
+scipy==1.10.0
